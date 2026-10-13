@@ -1,3343 +1,2349 @@
-<!DOCTYPE html>
-
-<html lang="bn">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-
-<title>CoolBoard Studio</title>
-
-<style>
-
-/* =========================================
-   RESET
-========================================= */
-
-*{
-    box-sizing:border-box;
-    -webkit-tap-highlight-color:transparent;
-}
-
-html,
-body{
-    margin:0;
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    font-family:Arial,sans-serif;
-    background:#070a14;
-}
-
-button,
-input{
-    font-family:inherit;
-}
-
-
-/* =========================================
-   APP
-========================================= */
-
-.app{
-    width:100%;
-    height:100dvh;
-
-    display:flex;
-    flex-direction:column;
-
-    background:
-    radial-gradient(
-        circle at 20% 0%,
-        rgba(86,77,180,.25),
-        transparent 30%
-    ),
-    radial-gradient(
-        circle at 90% 30%,
-        rgba(28,114,190,.15),
-        transparent 30%
-    ),
-    linear-gradient(
-        135deg,
-        #070a14,
-        #0c1022,
-        #080c18
-    );
-
-    overflow:hidden;
-}
-
-
-/* =========================================
-   HEADER
-========================================= */
-
-.header{
-
-    height:48px;
-    min-height:48px;
-
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-
-    padding:0 10px;
-
-    background:
-    rgba(10,14,30,.85);
-
-    backdrop-filter:blur(15px);
-
-    border-bottom:
-    1px solid
-    rgba(255,255,255,.08);
-
-    box-shadow:
-    0 5px 20px
-    rgba(0,0,0,.2);
-
-    z-index:50;
-}
-
-
-.logo{
-
-    color:#fff;
-
-    font-size:14px;
-
-    font-weight:bold;
-
-    letter-spacing:.3px;
-
-    text-shadow:
-    0 0 15px
-    rgba(123,92,255,.5);
-}
-
-
-.logo span{
-
-    color:#9d85ff;
-
-}
-
-
-.mode-switch{
-
-    display:flex;
-
-    gap:5px;
-
-}
-
-
-.mode-btn{
-
-    border:none;
-
-    padding:7px 9px;
-
-    border-radius:10px;
-
-    background:
-    linear-gradient(
-        145deg,
-        #222b4a,
-        #141a30
-    );
-
-    color:#dce3ff;
-
-    font-size:9px;
-
-    cursor:pointer;
-
-    box-shadow:
-    3px 3px 8px
-    rgba(0,0,0,.35),
-    inset 1px 1px 2px
-    rgba(255,255,255,.05);
-
-    transition:.25s;
-
-}
-
-
-.mode-btn.active{
-
-    background:
-    linear-gradient(
-        135deg,
-        #795dff,
-        #248ee8
-    );
-
-    color:white;
-
-    box-shadow:
-    0 0 18px
-    rgba(103,88,255,.4);
-
-}
-
-
-/* =========================================
-   BOARD AREA
-========================================= */
-
-.board-area{
-
-    flex:1;
-
-    min-height:0;
-
-    display:flex;
-
-    align-items:center;
-    justify-content:center;
-
-    padding:6px;
-
-    overflow:hidden;
-
-}
-
-
-/* =========================================
-   BOARD
-========================================= */
-
-.board{
-
-    width:100%;
-    height:100%;
-
-    max-width:1200px;
-
-    position:relative;
-
-    overflow:hidden;
-
-    border-radius:14px;
-
-    background:#e4e6ea;
-
-    box-shadow:
-
-    0 20px 50px
-    rgba(0,0,0,.45),
-
-    inset
-    0 0 0 1px
-    rgba(255,255,255,.7);
-
-    touch-action:none;
-
-}
-
-
-/* subtle board texture */
-
-.board::before{
-
-    content:"";
-
-    position:absolute;
-
-    inset:0;
-
-    pointer-events:none;
-
-    opacity:.12;
-
-    background-image:
-
-    linear-gradient(
-        rgba(0,0,0,.04) 1px,
-        transparent 1px
-    ),
-
-    linear-gradient(
-        90deg,
-        rgba(0,0,0,.04) 1px,
-        transparent 1px
-    );
-
-    background-size:
-    25px 25px;
-
-}
-
-
-/* =========================================
-   CANVAS
-========================================= */
-
-#canvas{
-
-    position:absolute;
-
-    inset:0;
-
-    width:100%;
-    height:100%;
-
-    touch-action:none;
-
-}
-
-
-/* =========================================
-   SELECTION
-========================================= */
-
-.selection-box{
-
-    position:absolute;
-
-    display:none;
-
-    pointer-events:none;
-
-    border:
-    2px dashed
-    #755cff;
-
-    border-radius:6px;
-
-    box-shadow:
-
-    0 0 0 1px
-    rgba(255,255,255,.7),
-
-    0 0 15px
-    rgba(103,85,255,.7);
-
-    z-index:30;
-
-    animation:
-    selectionGlow
-    1s infinite alternate;
-
-}
-
-
-@keyframes selectionGlow{
-
-    from{
-
-        box-shadow:
-        0 0 8px
-        rgba(105,82,255,.5);
-
-    }
-
-    to{
-
-        box-shadow:
-        0 0 20px
-        rgba(105,82,255,.9);
-
-    }
-
-}
-
-
-/* =========================================
-   SELECTED OBJECT
-========================================= */
-
-.selected-canvas{
-
-    position:absolute;
-
-    display:none;
-
-    z-index:20;
-
-    cursor:grab;
-
-    touch-action:none;
-
-    filter:
-    drop-shadow(
-        0 6px 12px
-        rgba(0,0,0,.25)
-    );
-
-}
-
-
-.selected-canvas.dragging{
-
-    cursor:grabbing;
-
-}
-
-
-/* =========================================
-   EMOJI
-========================================= */
-
-.emoji-object{
-
-    position:absolute;
-
-    z-index:15;
-
-    font-size:42px;
-
-    line-height:1;
-
-    cursor:grab;
-
-    user-select:none;
-
-    touch-action:none;
-
-    filter:
-
-    drop-shadow(
-        0 5px 5px
-        rgba(0,0,0,.2)
-    );
-
-}
-
-
-.emoji-object.selected{
-
-    outline:
-    2px dashed
-    #765fff;
-
-    outline-offset:5px;
-
-    border-radius:8px;
-
-}
-
-
-/* =========================================
-   OBJECT MENU
-========================================= */
-
-.object-menu{
-
-    position:absolute;
-
-    display:none;
-
-    gap:5px;
-
-    padding:5px;
-
-    z-index:100;
-
-    background:
-
-    rgba(15,20,42,.95);
-
-    backdrop-filter:
-    blur(15px);
-
-    border:
-
-    1px solid
-    rgba(255,255,255,.12);
-
-    border-radius:10px;
-
-    box-shadow:
-
-    0 10px 30px
-    rgba(0,0,0,.35);
-
-}
-
-
-.object-menu button{
-
-    border:none;
-
-    color:white;
-
-    background:
-
-    linear-gradient(
-        145deg,
-        #2d3962,
-        #1c2544
-    );
-
-    border-radius:7px;
-
-    padding:7px 9px;
-
-    font-size:10px;
-
-}
-
-
-/* =========================================
-   TOOLBAR
-========================================= */
-
-.toolbar{
-
-    min-height:198px;
-    max-height:198px;
-
-    padding:6px;
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:5px;
-
-    background:
-
-    linear-gradient(
-        180deg,
-        #141b34,
-        #0b1022
-    );
-
-    border-top:
-
-    1px solid
-    rgba(255,255,255,.08);
-
-    box-shadow:
-
-    0 -10px 25px
-    rgba(0,0,0,.18);
-
-    z-index:60;
-
-}
-
-
-/* =========================================
-   TOOL ROW
-========================================= */
-
-.tool-row{
-
-    display:flex;
-
-    gap:5px;
-
-    overflow-x:auto;
-
-    scrollbar-width:none;
-
-    -webkit-overflow-scrolling:touch;
-
-    padding-bottom:2px;
-
-}
-
-
-.tool-row::-webkit-scrollbar{
-
-    display:none;
-
-}
-
-
-/* =========================================
-   TOOL BUTTON
-========================================= */
-
-.tool{
-
-    min-width:48px;
-
-    height:42px;
-
-    flex-shrink:0;
-
-    border:none;
-
-    border-radius:10px;
-
-    color:#edf0ff;
-
-    background:
-
-    linear-gradient(
-        145deg,
-        #25305a,
-        #18203c
-    );
-
-    box-shadow:
-
-    3px 3px 8px
-    rgba(0,0,0,.3),
-
-    inset
-    1px 1px 2px
-    rgba(255,255,255,.06);
-
-    font-size:7px;
-
-    cursor:pointer;
-
-    transition:
-    transform .15s,
-    box-shadow .2s;
-
-}
-
-
-.tool span{
-
-    display:block;
-
-    font-size:16px;
-
-    margin-bottom:2px;
-
-}
-
-
-.tool:active{
-
-    transform:
-    scale(.94);
-
-}
-
-
-.tool.active{
-
-    background:
-
-    linear-gradient(
-        135deg,
-        #755cff,
-        #258eea
-    );
-
-    box-shadow:
-
-    0 0 15px
-    rgba(101,81,255,.5);
-
-}
-
-
-/* =========================================
-   SETTINGS
-========================================= */
-
-.settings{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:6px;
-
-    padding:1px 3px;
-
-}
-
-
-.settings label{
-
-    font-size:11px;
-
-}
-
-
-.settings input[type="range"]{
-
-    flex:1;
-
-    accent-color:#8067ff;
-
-}
-
-
-.settings input[type="color"]{
-
-    width:32px;
-
-    height:28px;
-
-    padding:2px;
-
-    border:
-
-    1px solid
-    rgba(255,255,255,.1);
-
-    border-radius:7px;
-
-    background:#20294b;
-
-}
-
-
-/* =========================================
-   ACTIONS
-========================================= */
-
-.actions{
-
-    display:grid;
-
-    grid-template-columns:
-    repeat(5,1fr);
-
-    gap:5px;
-
-}
-
-
-.action{
-
-    height:34px;
-
-    border:none;
-
-    border-radius:9px;
-
-    color:#e9edff;
-
-    background:
-
-    linear-gradient(
-        145deg,
-        #273258,
-        #18203c
-    );
-
-    font-size:8px;
-
-    cursor:pointer;
-
-}
-
-
-.action:active{
-
-    transform:
-    scale(.95);
-
-}
-
-
-/* =========================================
-   EMOJI PANEL
-========================================= */
-
-.emoji-panel{
-
-    position:absolute;
-
-    left:8px;
-    right:8px;
-
-    bottom:205px;
-
-    display:none;
-
-    grid-template-columns:
-    repeat(8,1fr);
-
-    gap:5px;
-
-    max-height:170px;
-
-    overflow-y:auto;
-
-    padding:9px;
-
-    z-index:150;
-
-    border-radius:15px;
-
-    background:
-
-    rgba(19,25,48,.97);
-
-    border:
-
-    1px solid
-    rgba(255,255,255,.1);
-
-    box-shadow:
-
-    0 15px 40px
-    rgba(0,0,0,.5);
-
-}
-
-
-.emoji-panel.show{
-
-    display:grid;
-
-    animation:
-    panelShow .2s ease;
-
-}
-
-
-@keyframes panelShow{
-
-    from{
-
-        opacity:0;
-
-        transform:
-        translateY(10px);
-
-    }
-
-    to{
-
-        opacity:1;
-
-        transform:
-        translateY(0);
-
-    }
-
-}
-
-
-.emoji{
-
-    height:38px;
-
-    border:none;
-
-    border-radius:8px;
-
-    background:#222d50;
-
-    font-size:19px;
-
-    cursor:pointer;
-
-}
-
-
-/* =========================================
-   MOBILE
-========================================= */
-
-@media(max-width:600px){
-
-    .header{
-
-        height:44px;
-        min-height:44px;
-
-    }
-
-    .logo{
-
-        font-size:12px;
-
-    }
-
-    .toolbar{
-
-        min-height:192px;
-        max-height:192px;
-
-    }
-
-    .tool{
-
-        min-width:46px;
-
-        height:40px;
-
-    }
-
-    .emoji-panel{
-
-        bottom:198px;
-
-        grid-template-columns:
-        repeat(7,1fr);
-
-    }
-
-}
-
-
-@media(max-height:680px){
-
-    .toolbar{
-
-        min-height:175px;
-        max-height:175px;
-
-    }
-
-    .tool{
-
-        height:38px;
-
-    }
-
-    .emoji-panel{
-
-        bottom:180px;
-
-    }
-
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div class="app">
-
-<!-- =========================================
-     HEADER
-========================================= -->
-
-<div class="header">
-
-```
-<div class="logo">
-    ✨ <span>CoolBoard</span>
-</div>
-
-<div class="mode-switch">
-
-    <button
-    class="mode-btn active"
-    onclick="setMode('kids',this)">
-        👶 Kids
-    </button>
-
-    <button
-    class="mode-btn"
-    onclick="setMode('advanced',this)">
-        🚀 Advanced
-    </button>
-
-</div>
-```
-
-</div>
-
-<!-- =========================================
-     BOARD
-========================================= -->
-
-<div class="board-area">
-
-```
-<div
-class="board"
-id="board">
-
-    <canvas
-    id="canvas">
-    </canvas>
-
-    <!-- Selection Border -->
-
-    <div
-    id="selectionBox"
-    class="selection-box">
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+    />
+
+    <title>Lamiya's Birthday</title>
+
+    <link
+      rel="stylesheet"
+      href="style.css"
+    />
+  </head>
+
+<!-- Falling confetti layer -->
+<div id="confettiContainer" aria-hidden="true"></div>
+
+  <body>
+    <!-- =========================================================
+     GLOBAL FLOATING DECORATIONS
+========================================================= -->
+
+    <div class="ambient">
+      <span class="ambient-item a1">🌸</span>
+      <span class="ambient-item a2">🦋</span>
+      <span class="ambient-item a3">🍃</span>
+      <span class="ambient-item a4">✨</span>
+      <span class="ambient-item a5">🦢</span>
+      <span class="ambient-item a6">🌷</span>
+      <span class="ambient-item a7">🪻</span>
+      <span class="ambient-item a8">🕊️</span>
+      <span class="ambient-item a9">💗</span>
+      <span class="ambient-item a10">🦢</span>
     </div>
 
-    <!-- Selected Drawing -->
+    <!-- =========================================================
+     COUNTDOWN PAGE
+========================================================= -->
 
-    <canvas
-    id="selectedCanvas"
-    class="selected-canvas">
-    </canvas>
+    <section
+      id="countdownPage"
+      class="screen countdown-screen active"
+    >
+      <div class="countdown-background">
+        <div class="soft-orb orb-one"></div>
+        <div class="soft-orb orb-two"></div>
+        <div class="soft-orb orb-three"></div>
 
-    <!-- Emoji / Object Menu -->
+        <span class="count-star s1">✦</span>
+        <span class="count-star s2">✧</span>
+        <span class="count-star s3">✦</span>
+        <span class="count-star s4">⋆</span>
 
-    <div
-    id="objectMenu"
-    class="object-menu">
+        <!-- RIGHT TO LEFT -->
+        <span class="moving-bird bird-one">🐉</span>
+        <span class="moving-bird bird-two">🕊️</span>
 
+        <span class="moving-butterfly butterfly-one">🦋</span>
+        <span class="moving-butterfly butterfly-two">🦋</span>
+
+        <div class="tiny-cloud cloud-one"></div>
+        <div class="tiny-cloud cloud-two"></div>
+      </div>
+
+      <div class="countdown-content">
+        <div class="countdown-photo-wrap">
+          <div class="photo-glow"></div>
+
+          <img
+            src="photos/lamiya.jpg"
+            alt="Butterfly"
+            class="countdown-photo"
+          />
+        </div>
+
+        <p class="small-label">✨ A little moment is waiting ✨</p>
+
+        <h1 class="countdown-title">Something Special</h1>
+
+        <p class="countdown-subtitle">
+          The celebration will appear when the countdown reaches zero.
+        </p>
+
+        <div class="countdown-box">
+          <div class="time-card">
+            <span id="days">00</span>
+            <small>Days</small>
+          </div>
+
+          <div class="time-card">
+            <span id="hours">00</span>
+            <small>Hours</small>
+          </div>
+
+          <div class="time-card">
+            <span id="minutes">00</span>
+            <small>Minutes</small>
+          </div>
+
+          <div class="time-card">
+            <span id="seconds">00</span>
+            <small>Seconds</small>
+          </div>
+        </div>
+
+        <div class="social-area">
+          <a
+            id="facebookLink"
+            href="#"
+            target="_blank"
+            class="social-button facebook"
+          >
+            Facebook
+          </a>
+
+          <a
+            id="instagramLink"
+            href="#"
+            target="_blank"
+            class="social-button instagram"
+          >
+            Instagram
+          </a>
+        </div>
+
+        <p class="time-note">
+          🌷 The page will automatically open after the selected time.
+        </p>
+      </div>
+    </section>
+
+    <!-- =========================================================
+     MAIN BIRTHDAY PAGE
+========================================================= -->
+
+    <section
+      id="birthdayPage"
+      class="screen birthday-screen"
+    >
+      <div class="birthday-background">
+        <div class="soft-orb orb-four"></div>
+        <div class="soft-orb orb-five"></div>
+
+        <span class="birthday-float bf1">🌸</span>
+        <span class="birthday-float bf2">🦋</span>
+        <span class="birthday-float bf3">🍃</span>
+        <span class="birthday-float bf4">✨</span>
+        <span class="birthday-float bf5">🌷</span>
+        <span class="birthday-float bf6">🕊️</span>
+
+        <!-- RIGHT TO LEFT -->
+        <span class="birthday-bird bb1">🐦</span>
+        <span class="birthday-bird bb2">🕊️</span>
+
+        <div class="birthday-cloud bc1"></div>
+        <div class="birthday-cloud bc2"></div>
+      </div>
+
+      <div class="birthday-content">
+        <!-- MAIN IMAGE -->
+
+        <div class="main-photo-wrapper">
+          <div class="main-photo-ring ring-one"></div>
+          <div class="main-photo-ring ring-two"></div>
+
+          <img
+            src="photos/lamiya.jpg"
+            alt="Lamiya"
+            class="main-photo"
+          />
+
+          <span class="photo-spark spark-one">✦</span>
+          <span class="photo-spark spark-two">✧</span>
+        </div>
+
+        <p class="birthday-small">🌷 Today is a beautiful day 🌷</p>
+
+        <h1 class="happy-title">Happy Birthday</h1>
+
+        <h2 class="name-title">Lamiya 🐥</h2>
+
+        <p class="birthday-wish">
+          Wishing you a beautiful year filled with happiness, good memories,
+          peaceful moments, success, and lots of reasons to smile. ✨
+        </p>
+
+        <!-- =================================================
+             CSS CAKE
+        ================================================= -->
+<!-- Celebration Confetti -->
+<div class="celebration-confetti" aria-hidden="true">
+    <span>🎊</span>
+    <span>🎉</span>
+    <span>💜</span>
+    <span>💗</span>
+    <span>💙</span>
+    <span>💚</span>
+    <span>✨</span>
+    <span>🎊</span>
+    <span>🎉</span>
+    <span>💖</span>
+    <span>⭐</span>
+    <span>🎊</span>
+    <span>💜</span>
+    <span>💙</span>
+    <span>🎉</span>
+    <span>✨</span>
+    <span>💗</span>
+    <span>🎊</span>
+    <span>🎉</span>
+    <span>💛</span>
+    <span>💙</span>
+</div>
+        <div class="cake-area">
+          <div class="cake-plate"></div>
+
+          <div
+            id="cake"
+            class="cake"
+          >
+            <div class="cake-top">
+              <div class="cream cream-one"></div>
+              <div class="cream cream-two"></div>
+              <div class="cream cream-three"></div>
+
+              <div class="candle candle1">
+                <div class="flame"></div>
+              </div>
+
+              <div class="candle candle2">
+                <div class="flame"></div>
+              </div>
+
+              <div class="candle candle3">
+                <div class="flame"></div>
+              </div>
+
+              <div class="candle candle4">
+                <div class="flame"></div>
+              </div>
+
+              <div class="candle candle5">
+                <div class="flame"></div>
+              </div>
+            </div>
+
+            <div class="cake-body">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+
+            <div class="cake-bottom"></div>
+          </div>
+        </div>
+
+        <p
+          id="celebrateMessage"
+          class="celebrate-message"
+        >
+          Make a wish and celebrate the moment! ✨
+        </p>
+
+        <div class="main-buttons">
+          <button
+            id="celebrateButton"
+            class="main-button primary"
+          >
+            🎉 Celebrate
+          </button>
+        </div>
+
+        <!-- Hidden until Celebrate -->
+
+        <div
+          id="afterCelebrate"
+          class="after-celebrate"
+        >
+          <p>🎊 The celebration has begun!</p>
+
+          <div class="after-buttons">
+            <button
+              id="wishButton"
+              class="main-button wish-button"
+            >
+              💌 Wish Letter
+            </button>
+            <button
+              id="exploreButton"
+              class="main-button explore-button"
+            >
+              🌎 Explore World
+            </button>
+
+            <button
+              id="resetButton"
+              class="main-button secondary"
+            >
+              🔄 Reset
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="confetti"
+        class="confetti-container"
+      ></div>
+    </section>
+
+    <!-- =========================================================
+     EXPLORE WORLD
+========================================================= -->
+
+    <section
+      id="explorePage"
+      class="screen explore-screen"
+    >
+      <div class="explore-nature">
+        <div class="moon">🌙</div>
+
+        <div class="nature-cloud nc1"></div>
+        <div class="nature-cloud nc2"></div>
+
+        <!-- RIGHT TO LEFT -->
+        <span class="nature-bird nb1">🐦</span>
+        <span class="nature-bird nb2">🕊️</span>
+
+        <span class="nature-butterfly nbut1">🦋</span>
+        <span class="nature-butterfly nbut2">🦋</span>
+
+        <span class="bee">🐝</span>
+        <span class="dragon">🐲</span>
+        <span class="spider">👾</span>
+        <span class="balloon">🎈</span>
+
+        <div class="mountains"></div>
+
+        <div class="river">
+          <span>🌊</span>
+          <span>🌊</span>
+          <span>🌊</span>
+        </div>
+      </div>
+
+      <div class="page-content explore-content">
         <button
-        onclick="deleteSelected()">
-            🗑️ Delete
+          class="back-button"
+          data-back
+        >
+          ← Back
         </button>
 
-        <button
-        onclick="deselectAll()">
-            ✓ Done
+        <h1 class="page-title">🌎 Explore World</h1>
+
+        <p class="page-intro">
+          A small collection of cute, peaceful and fun corners. ✨
+        </p>
+
+        <div class="explore-grid">
+          <button
+            class="explore-card"
+            data-page="aboutPage"
+          >
+            <span>🌸</span>
+            <strong>About</strong>
+            <small>A little introduction</small>
+          </button>
+
+          <button
+            class="explore-card"
+            data-page="favoritesPage"
+          >
+            <span>💗</span>
+            <strong>Favorites</strong>
+            <small>Things worth remembering</small>
+          </button>
+
+          <button
+            class="explore-card"
+            data-page="hobbiesPage"
+          >
+            <span>🎨</span>
+            <strong>Hobbies</strong>
+            <small>Fun things to enjoy</small>
+          </button>
+
+          <button
+            class="explore-card"
+            data-page="memoriesPage"
+          >
+            <span>📸</span>
+            <strong>Memories</strong>
+            <small>Little moments</small>
+          </button>
+
+          <button
+            class="explore-card"
+            data-page="funPage"
+          >
+            <span>🫩</span>
+            <strong>Fun Corner</strong>
+            <small>A little laugh</small>
+          </button>
+       
+          <button
+            class="explore-card"
+            data-page="peacefulPage"
+          >
+            <span>🦢</span>
+            <strong>Peaceful Place</strong>
+            <small>Calm little space</small>
+          </button>
+
+
+          <button
+            class="explore-card"
+            data-page="wishPage"
+          >
+            <span>💌</span>
+            <strong>Wish Letter</strong>
+            <small>A special message</small>
+          </button>
+        </div>
+      </div>
+      
+    </section>
+
+    <!-- =====================================================
+     ABOUT PAGE
+     ⭐ ONLY ABOUT BUTTON CUSTOMIZATION AREA
+===================================================== -->
+
+    <section
+      id="aboutPage"
+      class="screen inner-screen about-screen"
+
+    <div class="about-bg">
+         <button
+          class="back-button"
+          data-back
+        >
+          ← Back
         </button>
+
+        <span class="about-orb orb-one"></span>
+        <span class="about-orb orb-two"></span>
+        <span class="about-orb orb-three"></span>
+
+        <span class="about-star star-one">✦</span>
+        <span class="about-star star-two">✧</span>
+        <span class="about-star star-three">✦</span>
+
+        <span class="about-particle particle-one"></span>
+        <span class="about-particle particle-two"></span>
+        <span class="about-particle particle-three"></span>
+
+   
+
+
+    <!-- Main Content -->
+    <div class="about-content">
+
+
+        <!-- =========================
+             TITLE
+        ========================== -->
+
+        <div class="about-title">
+
+            <span class="about-small-title">
+               
+            </span>
+
+            <h1>
+                Her <span>World</span>
+            </h1>
+
+            <p>
+                Little things, beautiful moments
+                and a glimpse of who she is.
+            </p>
+
+        </div>
+
+
+
+        <!-- =========================
+             PROFILE
+        ========================== -->
+
+        <div class="about-profile">
+
+
+            <!-- PHOTO -->
+
+            <div class="about-photo-area">
+
+                <div class="photo-glow"></div>
+
+                <div class="photo-orbit orbit-one"></div>
+                <div class="photo-orbit orbit-two"></div>
+
+                <div class="about-photo">
+
+                    <img
+                        src="lamiya.jpg"
+                        alt="Lamiya Akter"
+                    >
+
+                </div>
+
+                <span class="about-butterfly butterfly-one">
+                    🦋
+                </span>
+
+                <span class="about-butterfly butterfly-two">
+                    🦋
+                </span>
+
+                <span class="about-sparkle sparkle-one">
+                    ✦
+                </span>
+
+                <span class="about-sparkle sparkle-two">
+                    ✧
+                </span>
+
+            </div>
+
+
+
+            <!-- INTRO -->
+
+            <div class="about-intro">
+
+                <span class="intro-label">
+                    HELLO, I'M
+                </span>
+
+                <h2>
+                    Lamiya Akter
+                </h2>
+
+                <p>
+               Like a dragon fruit — quiet, different, and easy to overlook. Those who understand its value appreciate it; those who don’t simply never see what makes it special.🌿🐉🥭
+                </p>
+
+
+                <!-- BASIC INFO -->
+
+                <div class="about-info">
+
+
+                    <div class="info-item">
+
+                        <span>🎂</span>
+
+                        <div>
+                            <small>Birthday</small>
+                            <strong>15 October</strong>
+                        </div>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <span>🇧🇩</span>
+
+                        <div>
+                            <small>Nationality</small>
+                            <strong>Bangladeshi</strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =========================
+             PERSONALITY
+        ========================== -->
+
+        <div class="about-block">
+
+
+            <div class="block-heading">
+
+                <span></span>
+
+                <div>
+                    <small>HER PERSONALITY</small>
+
+                    <h2>
+                        A Little About Her ✨
+                    </h2>
+                </div>
+
+            </div>
+
+
+            <p class="about-description">
+
+                She enjoys simple moments, meaningful
+                connections and discovering something new.
+                Her world is filled with music, journeys,
+                people, movies and little moments worth
+                remembering.
+
+            </p>
+
+
+            <!-- 3D CARDS -->
+
+            <div class="personality-cards">
+
+
+                <div class="personality-card">
+
+                    <span class="card-number">
+                        
+                    </span>
+
+                    <div class="personality-icon">
+                        🌷
+                    </div>
+
+                    <h3>
+                        Friendly
+                    </h3>
+
+                    <p>
+                        Loves connecting with people
+                        and sharing good moments.
+                    </p>
+
+                </div>
+
+
+                <div class="personality-card">
+
+                    <span class="card-number">
+                        
+                    </span>
+
+                    <div class="personality-icon">
+                        🌿
+                    </div>
+
+                    <h3>
+                        Peaceful
+                    </h3>
+
+                    <p>
+                        Finds beauty in simple and
+                        peaceful moments.
+                    </p>
+
+                </div>
+
+
+                <div class="personality-card">
+
+                    <span class="card-number">
+                        
+                    </span>
+
+                    <div class="personality-icon">
+                        ✨
+                    </div>
+
+                    <h3>
+                        Curious
+                    </h3>
+
+                    <p>
+                        Loves discovering new things,
+                        places and experiences.
+                    </p>
+
+                </div>
+
+
+                <div class="personality-card">
+
+                    <span class="card-number">
+                        
+                    </span>
+
+                    <div class="personality-icon">
+                        🤍
+                    </div>
+
+                    <h3>
+                        Positive
+                    </h3>
+
+                    <p>
+                        Appreciates the little things
+                        that make life beautiful.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =========================
+             INTERESTS
+        ========================== -->
+
+        <div class="about-block">
+
+
+            <div class="block-heading">
+
+                <span></span>
+
+                <div>
+                    <small>THINGS SHE LOVES</small>
+
+                    <h2>
+                        Her Interests 🌸
+                    </h2>
+                </div>
+
+            </div>
+
+
+            <div class="interest-cards">
+
+
+                <div class="interest-card">
+                    <span>✈️</span>
+                    <strong>Travelling</strong>
+                    <small>Exploring new places</small>
+                </div>
+
+
+                <div class="interest-card">
+                    <span>🌐</span>
+                    <strong>Internet Browsing</strong>
+                    <small>Discovering new things</small>
+                </div>
+
+
+                <div class="interest-card">
+                    <span>🤝</span>
+                    <strong>Meeting People</strong>
+                    <small>New people & connections</small>
+                </div>
+
+
+                <div class="interest-card">
+                    <span>🎬</span>
+                    <strong>Movies</strong>
+                    <small>Good stories & moments</small>
+                </div>
+
+
+                <div class="interest-card">
+                    <span>🎵</span>
+                    <strong>Music</strong>
+                    <small>Good songs & good vibes</small>
+                </div>
+
+
+                <div class="interest-card">
+                    <span>🌙💤</span>
+                    <strong>Dreamy Sleep</strong>
+                    <small>🌙 Sleep is her little escape.</small>
+                </div>
+
+
+                <div class="interest-card">
+                    <span>🐰</span>
+                    <strong>reels</strong>
+                    <small>just scrolling</small>
+                </div>
+
+
+                <div class="interest-card">
+                    <span>🌿</span>
+                    <strong>Nature Lover</strong>
+                    <small>Peaceful places & fresh air</small>
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =========================
+             QUOTE
+        ========================== -->
+
+        <div class="about-quote">
+
+            <span class="quote-mark">
+                “
+            </span>
+
+            <p>
+              Wild like the wind, calm like the forest, and free like the sky. 🌲🖤
+            </p>
+
+            <small>
+                — A little reminder to enjoy life 🌿
+            </small>
+
+        </div>
+
+
+
+        <!-- =========================
+             SOCIAL MEDIA
+        ========================== -->
+
+        <div class="about-block social-block">
+
+
+            <div class="block-heading center-heading">
+
+                <span></span>
+
+                <div>
+                    <small>CONNECT WITH HER</small>
+
+                    <h2>
+                        Find Her Online 💜
+                    </h2>
+                </div>
+
+            </div>
+
+
+            <p class="social-description">
+                Want to see more of her world?
+                Find her on social media.
+            </p>
+
+
+            <div class="social-cards">
+
+
+                <!-- Instagram -->
+
+                <a
+                    href="https://www.instagram.com/dragonfruite1.0/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="social-card instagram-card"
+                >
+
+                    <div class="social-icon">
+                        ◎
+                    </div>
+
+                    <div class="social-details">
+
+                        <strong>
+                            Instagram
+                        </strong>
+
+                        
+
+                    </div>
+
+                    <span class="social-arrow">
+                        ↗
+                    </span>
+
+                </a>
+
+
+
+                <!-- Facebook -->
+
+                <a
+                    href="https://www.facebook.com/profile.php?id=61583851411285"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="social-card facebook-card"
+                >
+
+                    <div class="social-icon facebook-icon">
+                        f
+                    </div>
+
+                    <div class="social-details">
+
+                        <strong>
+                            Facebook
+                        </strong>
+
+                       
+                    </div>
+
+                    <span class="social-arrow">
+                        ↗
+                    </span>
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =========================
+             END
+        ========================== -->
+
+        <div class="about-ending">
+
+            <div></div>
+
+            <p>
+                This is just a little glimpse
+                into her beautiful world. 💜
+            </p>
+
+            <span>
+                ✦ &nbsp; 🦋 &nbsp; ✦ &nbsp; 🌸 &nbsp; ✦
+            </span>
+
+        </div>
+
 
     </div>
 
+</section>
+
+    <!-- =========================================================
+     FAVORITES
+========================================================= -->
+
+    <section
+      id="favoritesPage"
+      class="screen inner-screen favorites-screen"
+    >
+      <div class="page-content">
+        <button
+          class="back-button"
+          data-back
+        >
+          ← Back
+        </button>
+
+
+
+<section id="customFavorites" class="custom-favorites">
+
+  <!-- FAVORITES HOME -->
+  <div id="favHome" class="fav-page active">
+
+    <button type="button" class="fav-main-back" data-favorites-exit>
+      ← Back to Explore World
+    </button>
+
+    <header class="fav-header">
+      <span class="fav-eyebrow">A LITTLE WORLD OF PEACE</span>
+      <h1>Favorites <span>♡</span></h1>
+      <p>Little things that make the world feel softer.</p>
+    </header>
+    
+
+  
+
+    <div class="fav-grid">
+
+      <button class="fav-card nature-card" type="button"
+              data-open="naturePage" data-category="naturePage">
+        <span class="fav-icon">🌿</span>
+        <h2>Nature &amp; Calm</h2>
+        <p>Flowing rivers, green forests and peaceful skies. A quiet place to breathe and enjoy simple moments.</p>
+        <span class="fav-link">Explore nature ↗</span>
+      </button>
+
+      <button class="fav-card flower-card" type="button"
+              data-open="flowersPage" data-category="flowersPage">
+        <span class="fav-icon">🌼</span>
+        <h2>Flowers</h2>
+        <p>Beautiful blossoms, delicate colours and little details that make an ordinary day feel special.</p>
+        <span class="fav-link">Discover flowers ↗</span>
+      </button>
+
+      <button class="fav-card sleep-card" type="button"
+              data-open="sleepPage" data-category="sleepPage">
+        <span class="fav-icon">🌙</span>
+        <h2>Sleeping</h2>
+        <p>Peaceful night videos, gentle snowfall and a calm atmosphere for a relaxing break.</p>
+        <span class="fav-link">Enter the night ↗</span>
+      </button>
+
+      <button class="fav-card music-card" type="button"
+              data-open="musicPage" data-category="musicPage">
+        <span class="fav-icon">🎧</span>
+        <h2>Music</h2>
+        <p>Ruposh OST — an emotional melody and a memorable atmosphere. Take a moment and enjoy the music.</p>
+        <span class="fav-link">Listen to music ↗</span>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- NATURE PAGE -->
+  <div id="naturePage" class="fav-page">
+    <button class="fav-back" type="button" data-back>← Back to Favorites</button>
+
+    <article class="fav-detail nature-detail">
+      <span class="detail-icon">🌿</span>
+      <span class="detail-label">BREATHE · SLOW DOWN · RESET</span>
+      <h2>Nature &amp; Calm</h2>
+      <p>Nature has a gentle way of making everything feel lighter. The sound of flowing water, the movement of leaves and the beauty of an open sky remind us to slow down.</p>
+      <p>Take a deep breath, let your thoughts settle and enjoy the little things around you. Sometimes, a peaceful moment is all you need.</p>
+      <div class="nature-decoration" aria-hidden="true">🌲　🍃　🏞️　🍃　🌲</div>
+    </article>
+  </div>
+
+  <!-- FLOWERS PAGE -->
+  <div id="flowersPage" class="fav-page">
+    <button class="fav-back" type="button" data-back>← Back to Favorites</button>
+
+    <article class="fav-detail flowers-detail">
+      <span class="detail-icon">🌼</span>
+      <span class="detail-label">A LITTLE BEAUTY IN EVERY BLOOM</span>
+      <h2>The World of Flowers</h2>
+      <p>Roses bring elegance, sunflowers carry warmth, and daisies remind us of life's simple joys. Every blossom has its own colours, character and beauty.</p>
+      <p>Flowers can brighten a room, bring a smile and turn an ordinary moment into a lovely memory. Sometimes, the smallest things are the most beautiful.</p>
+      <div class="flower-gallery" aria-label="Flower decorations">
+        <span>🌷</span><span>🌼</span><span>🌻</span><span>🌸</span><span>🌺</span>
+      </div>
+    </article>
+  </div>
+
+  <!-- SLEEPING PAGE -->
+  <div id="sleepPage" class="fav-page">
+    <button class="fav-back" type="button" data-back>← Back to Favorites</button>
+
+    <article class="fav-detail sleep-detail">
+      <span class="detail-icon">🌙</span>
+      <span class="detail-label">SLOW EVENINGS · QUIET DREAMS</span>
+      <h2>Sleeping &amp; Relaxation</h2>
+      <p>Sleepy Lamiya caught in 4K  😂 <br>
+         Enjoy these sleepy moments.</p>
+
+      <div class="sleep-video-frame">
+        <video id="sleepVideo" controls playsinline preload="metadata">
+          <source src="./photos/sleep.mp4" type="video/mp4">
+          Your browser does not support MP4 video.
+        </video>
+        <div id="sleepSnow" class="sleep-snow" aria-hidden="true"></div>
+      </div>
+
+      <p id="sleepStatus" class="media-status" aria-live="polite">
+        Your peaceful videos are ready.
+      </p>
+    </article>
+  </div>
+
+  <!-- MUSIC PAGE -->
+  <div id="musicPage" class="fav-page">
+    <button class="fav-back" type="button" data-back>← Back to Favorites</button>
+
+    <article class="fav-detail music-detail">
+      <div class="music-heading">
+        <span class="music-disc">♫</span>
+        <span class="detail-label">YOUR PERSONAL MUSIC CORNER</span>
+        <h2>Ruposh <span>♡</span></h2>
+        <p>A melody that makes ordinary moments unforgettable.</p>
+      </div>
+
+      <div class="music-bars" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+      </div>
+
+      <div class="music-video-frame">
+        <video id="musicVideo" controls playsinline preload="metadata">
+          <source src="photos/ruposhs.mp4" type="video/mp4">
+          Your browser does not support MP4 video.
+        </video>
+      </div>
+
+     
+
+      <div class="music-description">
+        <h3>Feel the Music</h3>
+        <p>Some melodies say what words cannot. Enjoy the emotional atmosphere, expressive music and beautiful moments of Ruposh.</p>
+        <p class="music-note">♫ Put on your headphones and enjoy the moment.</p>
+      </div>
+    </article>
+  </div>
+
+</section>
+
+<!-- ===== END FAVORITES SECTION ===== -->
+
+    </section>
+
+    <!-- =========================================================
+     HOBBIES
+========================================================= -->
+
+    <section id="hobbiesPage" class="screen inner-screen hobbies-page">
+
+    <!-- Animated Background -->
+    <div class="hobbies-bg" aria-hidden="true">
+
+        <span class="hobby-bg-item bg-leaf-1">🍃</span>
+        <span class="hobby-bg-item bg-leaf-2">🌿</span>
+        <span class="hobby-bg-item bg-flower-1">🌸</span>
+        <span class="hobby-bg-item bg-flower-2">🌷</span>
+
+        <span class="bg-butterfly bg-butterfly-1">🦋</span>
+        <span class="bg-butterfly bg-butterfly-2">🦋</span>
+
+        <span class="bg-star bg-star-1">✦</span>
+        <span class="bg-star bg-star-2">✧</span>
+        <span class="bg-star bg-star-3">⋆</span>
+        <span class="bg-star bg-star-4">✦</span>
+
+        <div class="bg-cloud bg-cloud-1"></div>
+        <div class="bg-cloud bg-cloud-2"></div>
+
+    </div>
+
+
+    <div class="hobbies-container">
+
+        <!-- Back -->
+        <button
+            class="back-button"
+            data-back
+            type="button"
+        >
+            ← Back
+        </button>
+
+
+        <!-- Header -->
+        <header class="hobbies-header">
+
+            <div class="hobbies-main-icon">
+                🐧
+            </div>
+
+            <span class="hobbies-eyebrow">
+                LITTLE THINGS SHE ENJOYS
+            </span>
+
+            <h1>
+                Hobbies
+            </h1>
+
+            <p>
+                The little things that make ordinary days
+                feel peaceful, enjoyable and beautiful. ✨
+            </p>
+
+        </header>
+
+
+        <!-- Hobbies -->
+        <div class="hobbies-grid">
+
+
+           
+            <article class="hobby-card nature-theme">
+
+                <span class="hobby-number"></span>
+
+                <div class="hobby-icon">
+                    🌿
+                </div>
+
+                <div class="hobby-text">
+                    <h2>Nature Walks</h2>
+                    <p>
+                        Quiet walks, green surroundings
+                        and a little time close to nature.
+                    </p>
+                </div>
+
+                <span class="hobby-float">🍃</span>
+
+            </article>
+
+                      
+         
+           <article class="hobby-card sleep-theme">
+
+                <span class="hobby-number"></span>
+
+                <div class="hobby-icon">
+                    😴
+                </div>
+
+                <div class="hobby-text">
+                    <h2>Sleeping</h2>
+                    <p>
+                        A cozy bed, peaceful rest
+                        and enjoying a little extra sleep.
+                    </p>
+                </div>
+
+                <span class="hobby-float">🌙</span>
+
+            </article>
+
+            <article class="hobby-card plant-theme">
+
+                <span class="hobby-number"></span>
+
+                <div class="hobby-icon">
+                    🪴
+                </div>
+
+                <div class="hobby-text">
+                    <h2>Plant Care</h2>
+                    <p>
+                        Taking care of little plants
+                        and enjoying their quiet growth.
+                    </p>
+                </div>
+
+                <span class="hobby-float">🌱</span>
+
+            </article>
+
+
+           
+            <article class="hobby-card sunset-theme">
+
+                <span class="hobby-number"></span>
+
+                <div class="hobby-icon">
+                    🌅
+                </div>
+
+                <div class="hobby-text">
+                    <h2>Sunset Watching</h2>
+                    <p>
+                        Slow evenings, beautiful skies
+                        and peaceful sunset moments.
+                    </p>
+                </div>
+
+                <span class="hobby-float">☁️</span>
+
+            </article>
+
+
+          
+            <article class="hobby-card rain-theme">
+
+                <span class="hobby-number"></span>
+
+                <div class="hobby-icon">
+                    🌧️
+                </div>
+
+                <div class="hobby-text">
+                    <h2>Rainy Days</h2>
+                    <p>
+                        The sound of rain, cool weather
+                        and cozy quiet moments.
+                    </p>
+                </div>
+
+                <span class="hobby-float">💧</span>
+
+            </article>
+
+
+            
+            <article class="hobby-card tea-theme">
+
+                <span class="hobby-number"></span>
+
+                <div class="hobby-icon">
+                    ☕
+                </div>
+
+                <div class="hobby-text">
+                    <h2>Tea & Adda</h2>
+                    <p>
+                        A warm cup of tea and relaxed
+                        conversations with familiar people.
+                    </p>
+                </div>
+
+                <span class="hobby-float">🤎</span>
+
+            </article>
+
+
+            <article class="hobby-card flower-theme">
+
+                <span class="hobby-number"></span>
+
+                <div class="hobby-icon">
+                    🌸
+                </div>
+
+                <div class="hobby-text">
+                    <h2>Flowers</h2>
+                    <p>
+                        Beautiful flowers, soft colors
+                        and the simple beauty of nature.
+                    </p>
+                </div>
+
+                <span class="hobby-float">🌷</span>
+
+            </article>
+
+
+           
+             <article class="hobby-card family-theme">
+
+                <span class="hobby-number"></span>
+
+                <div class="hobby-icon">
+                    🤍
+                </div>
+
+                <div class="hobby-text">
+                    <h2>Family Time</h2>
+                    <p>
+                        Simple moments, conversations
+                        and time spent with family.
+                    </p>
+                </div>
+
+                <span class="hobby-float">🏡</span>
+
+            </article>
+
+            <article class="hobby-card music-theme">
+
+                <span class="hobby-number"></span>
+
+                <div class="hobby-icon">
+                    🎧
+                </div>
+
+                <div class="hobby-text">
+                    <h2>Music</h2>
+                    <p>
+                        Good songs for different moods,
+                        moments and peaceful times.
+                    </p>
+                </div>
+
+                <span class="hobby-float">🎵</span>
+
+            </article>
+
+
+            
+            <article class="hobby-card movie-theme">
+
+                <span class="hobby-number"></span>
+
+                <div class="hobby-icon">
+                    🎬
+                </div>
+
+                <div class="hobby-text">
+                    <h2>Movies & Dramas</h2>
+                    <p>
+                        Interesting stories, memorable scenes
+                        and a comfortable screen-time break.
+                    </p>
+                </div>
+
+                <span class="hobby-float">✨</span>
+
+            </article>
+
+
+             <article class="hobby-card reels-theme">
+
+                <span class="hobby-number"></span>
+
+                <div class="hobby-icon">
+                    😂
+                </div>
+
+                <div class="hobby-text">
+                    <h2>Memes & Reels</h2>
+                    <p>
+                        Funny clips, entertaining moments
+                        and a little endless scrolling.
+                    </p>
+                </div>
+
+                <span class="hobby-float">📱</span>
+
+            </article>
+
+
+            
+            <article class="hobby-card reading-theme">
+
+                <span class="hobby-number"></span>
+
+                <div class="hobby-icon">
+                    📚
+                </div>
+
+                <div class="hobby-text">
+                    <h2>Reading</h2>
+                    <p>
+                        Getting lost in interesting pages,
+                        stories and ideas.
+                    </p>
+                </div>
+
+                <span class="hobby-float">📖</span>
+
+            </article>
+
+
+            <article class="hobby-card journal-theme">
+
+                <span class="hobby-number"></span>
+
+                <div class="hobby-icon">
+                    📝
+                </div>
+
+                <div class="hobby-text">
+                    <h2>Journaling</h2>
+                    <p>
+                        Putting thoughts, feelings
+                        and little memories into words.
+                    </p>
+                </div>
+
+                <span class="hobby-float">✍️</span>
+
+            </article>
+
+
+            
+            <article class="hobby-card photo-theme">
+
+                <span class="hobby-number"></span>
+
+                <div class="hobby-icon">
+                    📸
+                </div>
+
+                <div class="hobby-text">
+                    <h2>Photography</h2>
+                    <p>
+                        Capturing beautiful views,
+                        little details and memorable moments.
+                    </p>
+                </div>
+
+                <span class="hobby-float">💫</span>
+
+            </article>
+
+
+            <article class="hobby-card trip-theme">
+
+                <span class="hobby-number"></span>
+
+                <div class="hobby-icon">
+                    🚗
+                </div>
+
+                <div class="hobby-text">
+                    <h2>Little Trips</h2>
+                    <p>
+                        Short journeys, new views
+                        and simple memories along the way.
+                    </p>
+                </div>
+
+                <span class="hobby-float">🗺️</span>
+
+            </article>
+
+
+        
+            <article class="hobby-card shopping-theme">
+
+                <span class="hobby-number"></span>
+
+                <div class="hobby-icon">
+                    🛍️
+                </div>
+
+                <div class="hobby-text">
+                    <h2>Shopping</h2>
+                    <p>
+                        Exploring little finds,
+                        useful things and something nice.
+                    </p>
+                </div>
+
+                <span class="hobby-float">✨</span>
+
+            </article>
+
+
+        
+            <article class="hobby-card fashion-theme">
+
+                <span class="hobby-number"></span>
+
+                <div class="hobby-icon">
+                    👗
+                </div>
+
+                <div class="hobby-text">
+                    <h2>Fashion & Styling</h2>
+                    <p>
+                        Exploring outfits, personal style
+                        and beautiful little details.
+                    </p>
+                </div>
+
+                <span class="hobby-float">🌷</span>
+
+            </article>
+
+
+        
+          
+
+
+            <article class="hobby-card friends-theme">
+
+                <span class="hobby-number"></span>
+
+                <div class="hobby-icon">
+                    🐍
+                </div>
+
+                <div class="hobby-text">
+                    <h2>Friends & Adda</h2>
+                    <p>
+                        Good conversations, laughter
+                        and memorable moments with friends.
+                    </p>
+                </div>
+
+                <span class="hobby-float">💬</span>
+
+            </article>
+
+              <article class="hobby-card baking-theme">
+
+                <span class="hobby-number"></span>
+
+                <div class="hobby-icon">
+                    🧁
+                </div>
+
+                <div class="hobby-text">
+                    <h2>Baking</h2>
+                    <p>
+                        Sweet little creations,
+                        cozy moments and something delicious.
+                    </p>
+                </div>
+
+                <span class="hobby-float">🍰</span>
+
+            </article>
+           
+  
+
+        </div>
+
+
+        <!-- Ending -->
+        <div class="hobbies-ending">
+
+            <span>🦋</span>
+
+            <p>
+                Sometimes the little things
+                make the best moments.
+            </p>
+
+            <span>🌿</span>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- =====================================================
+     MEMORIES PAGE
+     ===================================================== -->
+
+<section id="memoriesPage" class="screen inner-screen memories-page">
+
+    <!-- Animated Nature Background -->
+    <div class="memories-world">
+
+        <!-- Sky -->
+        <div class="memory-sky-glow"></div>
+
+        <!-- Clouds -->
+        <span class="memory-cloud cloud-1">☁️</span>
+        <span class="memory-cloud cloud-2">☁️</span>
+        <span class="memory-cloud cloud-3">🌤️</span>
+
+        <!-- Flying Birds -->
+        <div class="memory-birds">
+            <span class="bird bird-1">🕊️</span>
+            <span class="bird bird-2">🐦</span>
+            <span class="bird bird-3">🕊️</span>
+            <span class="bird bird-4">🐦</span>
+            <span class="bird bird-5">🦢</span>
+            <span class="bird bird-6">🐧</span>
+        </div>
+
+        <!-- Extra Flying Elements -->
+        <span class="memory-float float-feather">🪶</span>
+        <span class="memory-float float-butterfly">🦋</span>
+        <span class="memory-float float-butterfly-2">🦋</span>
+        <span class="memory-float float-flower">🌸</span>
+        <span class="memory-float float-leaf">🍃</span>
+
+        <!-- Mountains -->
+        <div class="memory-mountains">
+            <div class="mountain mountain-1"></div>
+            <div class="mountain mountain-2"></div>
+            <div class="mountain mountain-3"></div>
+        </div>
+
+        <!-- River -->
+        <div class="memory-river">
+
+            <div class="river-shine shine-1"></div>
+            <div class="river-shine shine-2"></div>
+            <div class="river-shine shine-3"></div>
+            <div class="river-shine shine-4"></div>
+
+            <!-- Boat -->
+            <div class="memory-boat">
+
+                <span class="boat-person">🧍</span>
+
+                <div class="boat-body"></div>
+
+                <div class="boat-rope"></div>
+
+            </div>
+
+        </div>
+
+        <!-- River Side Nature -->
+        <div class="memory-ground">
+            <span>🌿</span>
+            <span>🌱</span>
+            <span>🌸</span>
+            <span>🌷</span>
+            <span>🍃</span>
+            <span>🪻</span>
+            <span>🌿</span>
+            <span>🍄</span>
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         BACK BUTTON
+         ================================================= -->
+
+      <button
+          class="back-button"
+          data-back
+        >
+          ← Back
+        </button>
+
+
+    <!-- =================================================
+         MEMORY INTRO / GIFT BOX
+         ================================================= -->
+
+    <div id="memoryIntro" class="memory-intro">
+
+        <div class="memory-intro-content">
+
+            <span class="memory-small-title">
+                📸 LITTLE MEMORIES ✨
+            </span>
+
+            <h1>
+                A Little Journey 🌿
+            </h1>
+
+            <p>
+                A collection of simple moments,
+                little memories and beautiful days. 🦋
+            </p>
+
+
+            <!-- Gift Box -->
+            <div class="memory-gift-area">
+
+                <div class="memory-gift-glow"></div>
+
+                <div
+                    id="memoryGift"
+                    class="memory-gift"
+                >
+
+                    <!-- Gift Lid -->
+                    <div class="gift-lid">
+
+                        <div class="gift-ribbon"></div>
+
+                    </div>
+
+                    <!-- Gift Box -->
+                    <div class="gift-box">
+
+                        <div class="gift-ribbon vertical"></div>
+
+                        <div class="gift-ribbon horizontal"></div>
+
+                    </div>
+
+                    <!-- Gift Decorations -->
+                    <div class="gift-spark spark-1">
+                        ✦
+                    </div>
+
+                    <div class="gift-spark spark-2">
+                        ✨
+                    </div>
+
+                    <div class="gift-spark spark-3">
+                        💫
+                    </div>
+
+                </div>
+
+
+                <!-- Click Button -->
+                <button
+                    id="memoryClickHere"
+                    class="memory-click-button"
+                    type="button"
+                >
+                    🎁 Click Here ✨
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         PHOTO INTRO
+         ALL IMAGES ARE REAL <img> TAGS
+         ================================================= -->
+
+    <div
+        id="memoryPhotoIntro"
+        class="memory-photo-intro"
+    >
+
+
+    </div>
+
+
+    <!-- =================================================
+         FULL MEMORY GALLERY
+         ================================================= -->
+
+    <div
+        id="memoryGallery"
+        class="memory-gallery"
+    >
+
+        <!-- Decorative Floating Emojis -->
+        <span class="gallery-float gf-1">🦋</span>
+        <span class="gallery-float gf-2">🌸</span>
+        <span class="gallery-float gf-3">🍃</span>
+        <span class="gallery-float gf-4">✨</span>
+        <span class="gallery-float gf-5">💐</span>
+        <span class="gallery-float gf-6">🪶</span>
+
+
+        <!-- Gallery Heading -->
+        <div class="memory-gallery-top">
+
+            <span>
+                📸 LITTLE MEMORIES
+            </span>
+
+            <h2>
+                Moments ✨
+            </h2>
+
+            <p>
+                Simple moments, beautifully remembered.
+            </p>
+
+        </div>
+
+
+        <!-- Main Photo -->
+        <div class="memory-gallery-stage">
+
+            <div class="memory-gallery-frame">
+
+                <div class="memory-gallery-glow"></div>
+
+
+                <!--
+                    Main gallery image.
+                    JavaScript will change its src
+                    using the IMG tags above.
+                -->
+
+                <img
+                    id="memoryGalleryImage"
+                    src="lamiya.jpg"
+                    alt="Memory"
+                >
+
+
+                <!-- Photo Decoration -->
+                <div class="photo-corner corner-top">
+                    ✦
+                </div>
+
+                <div class="photo-corner corner-bottom">
+                    ✧
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Image Number -->
+        <div class="memory-gallery-info">
+
+            <div
+                id="memoryGalleryCount"
+                class="memory-gallery-count"
+            >
+                01 / 14
+            </div>
+
+        </div>
+
+
+        <!-- Progress -->
+        <div class="memory-gallery-progress">
+
+            <div
+                id="memoryGalleryProgress"
+            ></div>
+
+        </div>
+
+
+        <!-- Small Decorative Text -->
+        <div class="memory-gallery-bottom">
+
+            <span>🌿</span>
+            <span>Moments</span>
+            <span>🦋</span>
+
+        </div>
+
+    </div>
+
+</section>
+    <!-- =========================================================
+     MUSIC
+========================================================= -->
+
+   
+    <!-- =========================================================
+     FLOWERS
+========================================================= -->
+
+    <section
+      id="flowersPage"
+      class="screen inner-screen flowers-screen"
+    >
+      <div class="page-content">
+        <button
+          class="back-button"
+          data-back
+        >
+          ← Back
+        </button>
+
+        <div class="flower-rain">
+          <span>🌸</span>
+          <span>🌷</span>
+          <span>💐</span>
+          <span>🪻</span>
+          <span>🌸</span>
+          <span>🌷</span>
+        </div>
+
+        <div class="inner-icon">💐</div>
+
+        <h1 class="page-title">Flower Garden</h1>
+
+        <div class="flower-grid">
+          <div>🌸</div>
+          <div>🌷</div>
+          <div>💐</div>
+          <div>🪻</div>
+          <div>🌸</div>
+          <div>🌷</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+     FUN
+========================================================= -->
+
+    <section
+      id="funPage"
+      class="screen inner-screen fun-screen"
+    >
+      <div class="page-content">
+        <button
+          class="back-button"
+          data-back
+        >
+          ← Back
+        </button>
+<div class="fun-card">
+<div class="inner-icon">😎</div>
+
+<h1 class="page-title">Her Attitude Level</h1>
+
+<p>
+  Attitude: 100% 😏<br>
+  Drama: Unlimited 😂<br>
+  Innocence: Under Investigation 🤨
+</p>
+
+<p>Warning: Too much attitude detected! 🚨🤣</p>
+  <video
+    class="fun-video"
+    controls
+    playsinline
+    preload="metadata"
+  >
+    <source src="photos/meme.mp4" type="video/mp4">
+    Your browser does not support this video.
+  </video>
+
 </div>
-```
+    </section>
 
-</div>
+    <!-- =========================================================
+     PEACEFUL PLACE
+========================================================= -->
 
-<!-- =========================================
-     EMOJI PANEL
-========================================= -->
+  <section
+  id="peacefulPage"
+  class="screen inner-screen peaceful-flower-world"
+  hidden
+>
+  <!-- Animated background -->
+  <div class="flower-sky" aria-hidden="true">
+    <div class="flower-sun"></div>
+    <span class="flower-cloud cloud-a"></span>
+    <span class="flower-cloud cloud-b"></span>
 
-<div
-id="emojiPanel"
-class="emoji-panel">
-</div>
+    <span class="flower-bird bird-a">🕊️</span>
+    <span class="flower-bird bird-b">🐦</span>
+    <span class="flower-bird bird-c">🕊️</span>
+    <span class="flower-bird bird-d">🐦</span>
 
-<!-- =========================================
-     TOOLBAR
-========================================= -->
+    <div class="flower-mountain mountain-a"></div>
+    <div class="flower-mountain mountain-b"></div>
 
-<div class="toolbar">
+    <div class="flower-river">
+      <span class="flower-fish fish-a">🐟</span>
+      <span class="flower-fish fish-b">🐠</span>
+      <i class="water-line water-a"></i>
+      <i class="water-line water-b"></i>
+      <i class="water-line water-c"></i>
+    </div>
 
-```
-<!-- MAIN TOOLS -->
+    <div class="flower-grass">
+      🌿 🌷 🌼 🌸 🍃 🌺 🌷 🌿 🌼
+    </div>
 
-<div class="tool-row">
+    <span class="floating-flower float-a">🌸</span>
+    <span class="floating-flower float-b">🌼</span>
+    <span class="floating-flower float-c">🦋</span>
+    <span class="floating-flower float-d">🍃</span>
+  </div>
 
+  <!-- Back button: uses your existing navigation -->
+  <div class="page-content flower-topbar">
     <button
-    class="tool active"
-    data-tool="pencil">
+      class="back-button"
+      data-back
+      type="button"
+    >
+      ← Back
+    </button>
+  </div>
 
-        <span>✏️</span>
-        Pencil
+  <!-- Gallery heading -->
+  <div class="flower-gallery-content">
+    <div class="flower-decorations" aria-hidden="true">
+      🌷 🌼 🌸 🍃 🌺
+    </div>
 
+    <span class="flower-eyebrow">A LITTLE WORLD OF BLOOMS</span>
+
+    <h1 class="flower-heading">
+      Flower <em>World</em>
+    </h1>
+
+    <p class="flower-subtitle">
+      Where flowers bloom, happiness grows.
+    </p>
+
+    <!-- Image number only -->
+    <div
+      id="peacefulFlowerNumber"
+      class="flower-number"
+      aria-live="polite"
+    >
+      Flower 1 / 33
+    </div>
+
+    <!-- Main photo -->
+    <div class="flower-photo-frame">
+      <div class="flower-photo-glow"></div>
+
+      <img
+        id="peacefulFlowerImage"
+        src="photos/flower1.jpg"
+        alt="Flower 1"
+        fetchpriority="high"
+      >
+    </div>
+
+    <p class="flower-bottom-note">
+      🌿 Let happiness bloom, one flower at a time. 🌿
+    </p>
+  </div>
+
+ 
+</section>
+
+
+    <!-- =========================================================
+     
+     WISH LETTER
+========================================================= -->
+
+    <section
+      id="wishPage"
+      class="screen inner-screen wish-screen"
+    >
+      <div class="page-content">
+        <button
+          class="back-button"
+          data-back
+        >
+          ← Back
+        </button>
+
+        <div class="letter">
+          <div class="letter-icon">💌</div>
+
+<div class="birthday-wish-content">
+
+
+<h1>A Little Wish 🐣</h1>
+
+<p>Happy Birthday, Lamiya! 🐣🤍</p>
+
+<p>
+  You have such a calm and gentle way of being,
+  and honestly, I'm really happy to have a friend like you.
+</p>
+
+<p>
+  I hope life stays kind to you, gives you countless
+  reasons to smile, and brings you the happiness
+  you truly deserve. 🌷
+</p>
+
+<p>
+  Never lose your beautiful simplicity.
+  May your little world always be filled with peace,
+  warmth, and lovely moments. 🤍✨
+</p>
+
+<p><strong>Stay happy, I'm glad our friendship exists.Happy birthday Lamiya . 🕊️🤍</strong></p>
+
+
+          <div class="letter-footer">🌸 💐 🦋 🕊️ 🌸</div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- =========================================================
+     ICE CREAM
+========================================================= -->
+
+    <section
+      id="icecreamPage"
+      class="screen inner-screen icecream-screen"
+    >
+      <div class="page-content">
+        <button
+          class="back-button"
+          data-back
+        >
+          ← Back
+        </button>
+
+
+<!-- FLOWER WORLD PAGE -->
+<section id="icecreamPage" class="page flower-page">
+
+  <div class="fw-sky" aria-hidden="true">
+    <span class="fw-cloud fw-cloud-one">☁️</span>
+    <span class="fw-cloud fw-cloud-two">☁️</span>
+
+    <span class="fw-bird fw-bird-one">🐦</span>
+    <span class="fw-bird fw-bird-two">🕊️</span>
+    <span class="fw-bird fw-bird-three">🐦</span>
+
+    <span class="fw-floating fw-f1">🌸</span>
+    <span class="fw-floating fw-f2">🌷</span>
+    <span class="fw-floating fw-f3">🌼</span>
+    <span class="fw-floating fw-f4">🌺</span>
+  </div>
+
+  <div class="fw-scenery" aria-hidden="true">
+    <div class="fw-mountains"></div>
+    <div class="fw-river"></div>
+    <div class="fw-grass"></div>
+    <div class="fw-garden">🌷 🌼 🌸 🌿 🌺 🌻 🌷 🌸 🌼</div>
+  </div>
+
+  <div class="fw-container">
+
+    <button type="button" class="fw-back" data-back>
+      ← Back
     </button>
 
+    <!-- Welcome Screen -->
+    <div class="fw-welcome" id="fwWelcome">
 
-    <button
-    class="tool"
-    data-tool="brush">
+      <div class="fw-decor">🌸 ✿ 🌷 ✿ 🌼</div>
 
-        <span>🖌️</span>
-        Brush
+      <span class="fw-label">A LITTLE WORLD OF BLOOMS</span>
 
-    </button>
+      <h1>Flower <span>World</span></h1>
 
+      <p class="fw-quote">
+        “Where flowers bloom, happiness grows.”
+      </p>
 
-    <button
-    class="tool"
-    data-tool="eraser">
-
-        <span>🧽</span>
-        Eraser
-
-    </button>
-
-
-    <button
-    class="tool"
-    data-tool="select">
-
-        <span>🎯</span>
-        Move
-
-    </button>
-
-
-    <button
-    class="tool"
-    data-tool="emoji">
-
-        <span>😀</span>
-        Emoji
-
-    </button>
-
-
-    <!-- ADVANCED -->
-
-    <button
-    class="tool advanced"
-    data-tool="line">
-
-        <span>➖</span>
-        Line
-
-    </button>
-
-
-    <button
-    class="tool advanced"
-    data-tool="arrow">
-
-        <span>➡️</span>
-        Arrow
-
-    </button>
-
-
-    <button
-    class="tool advanced"
-    data-tool="circle">
-
-        <span>⭕</span>
-        Circle
-
-    </button>
-
-
-    <button
-    class="tool advanced"
-    data-tool="rectangle">
-
-        <span>▭</span>
-        Box
-
-    </button>
-
-
-    <button
-    class="tool advanced"
-    data-tool="triangle">
-
-        <span>🔺</span>
-        Triangle
-
-    </button>
-
-
-    <button
-    class="tool advanced"
-    data-tool="star">
-
-        <span>⭐</span>
-        Star
-
-    </button>
-
-</div>
-
-
-<!-- SETTINGS -->
-
-<div class="settings">
-
-    <label>🎨</label>
-
-    <input
-    type="color"
-    id="colorPicker"
-    value="#303030">
-
-
-    <label>📏</label>
-
-    <input
-    type="range"
-    id="sizeSlider"
-    min="1"
-    max="40"
-    value="5">
-
-
-    <input
-    type="color"
-    id="boardColor"
-    value="#e4e6ea">
-
-</div>
-
-
-<!-- ACTIONS -->
-
-<div class="actions">
-
-    <button
-    class="action"
-    onclick="undo()">
-        ↩ Undo
-    </button>
-
-
-    <button
-    class="action"
-    onclick="redo()">
-        ↪ Redo
-    </button>
-
-
-    <button
-    class="action"
-    onclick="exportBoard()">
-        💾 Save
-    </button>
-
-
-    <button
-    class="action"
-    onclick="clearBoard()">
-        🗑 Clear
-    </button>
-
-
-    <button
-    class="action"
-    onclick="toggleEmojiPanel()">
-        😀 Emoji
-    </button>
-
-</div>
-```
-
-</div>
-
-<script>
-
-/* =========================================
-   ELEMENTS
-========================================= */
-
-const board =
-document.getElementById("board");
-
-const canvas =
-document.getElementById("canvas");
-
-const ctx =
-canvas.getContext("2d",{
-    willReadFrequently:true
-});
-
-const selectionBox =
-document.getElementById("selectionBox");
-
-const selectedCanvas =
-document.getElementById("selectedCanvas");
-
-const selectedCtx =
-selectedCanvas.getContext("2d");
-
-const colorPicker =
-document.getElementById("colorPicker");
-
-const sizeSlider =
-document.getElementById("sizeSlider");
-
-const boardColor =
-document.getElementById("boardColor");
-
-const emojiPanel =
-document.getElementById("emojiPanel");
-
-const objectMenu =
-document.getElementById("objectMenu");
-
-
-/* =========================================
-   STATE
-========================================= */
-
-let currentTool =
-"pencil";
-
-let drawing =
-false;
-
-let startX = 0;
-let startY = 0;
-
-let lastX = 0;
-let lastY = 0;
-
-let savedImage =
-null;
-
-
-/* SELECT MODE */
-
-let selecting =
-false;
-
-let selectionStartX = 0;
-let selectionStartY = 0;
-
-let selectionData =
-null;
-
-
-/* MOVE SELECTED DRAWING */
-
-let movingSelection =
-false;
-
-let moveOffsetX = 0;
-let moveOffsetY = 0;
-
-
-/* HISTORY */
-
-let history = [];
-let redoHistory = [];
-
-
-/* =========================================
-   RESIZE CANVAS
-========================================= */
-
-function resizeCanvas(){
-
-    const temp =
-    document.createElement("canvas");
-
-    temp.width =
-    canvas.width;
-
-    temp.height =
-    canvas.height;
-
-    const tempCtx =
-    temp.getContext("2d");
-
-    if(
-    canvas.width > 0
-    ){
-
-        tempCtx.drawImage(
-            canvas,
-            0,
-            0
-        );
-
-    }
-
-
-    canvas.width =
-    board.clientWidth;
-
-    canvas.height =
-    board.clientHeight;
-
-
-    if(
-    temp.width > 0
-    ){
-
-        ctx.drawImage(
-            temp,
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        );
-
-    }
-
-}
-
-
-resizeCanvas();
-
-window.addEventListener(
-"resize",
-resizeCanvas
-);
-
-
-/* =========================================
-   GET POSITION
-========================================= */
-
-function getPosition(event){
-
-    const rect =
-    canvas.getBoundingClientRect();
-
-    return{
-
-        x:
-        (event.clientX - rect.left)
-        *
-        (
-            canvas.width /
-            rect.width
-        ),
-
-        y:
-        (event.clientY - rect.top)
-        *
-        (
-            canvas.height /
-            rect.height
-        )
-
-    };
-
-}
-
-
-/* =========================================
-   TOOL SELECT
-========================================= */
-
-document
-.querySelectorAll(".tool")
-.forEach(button=>{
-
-    button.addEventListener(
-    "click",
-    ()=>{
-
-        currentTool =
-        button.dataset.tool;
-
-
-        document
-        .querySelectorAll(".tool")
-        .forEach(btn=>{
-
-            btn.classList
-            .remove("active");
-
-        });
-
-
-        button.classList
-        .add("active");
-
-
-        if(
-        currentTool !==
-        "select"
-        ){
-
-            deselectAll();
-
-        }
-
-
-        if(
-        currentTool ===
-        "emoji"
-        ){
-
-            toggleEmojiPanel();
-
-        }
-
-    });
-
-});
-
-
-/* =========================================
-   POINTER DOWN ON MAIN CANVAS
-========================================= */
-
-canvas.addEventListener(
-"pointerdown",
-event=>{
-
-    event.preventDefault();
-
-
-    const pos =
-    getPosition(event);
-
-
-    /* =====================================
-       SELECT MODE
-    ===================================== */
-
-    if(
-    currentTool ===
-    "select"
-    ){
-
-        deselectAll();
-
-
-        selecting =
-        true;
-
-
-        selectionStartX =
-        pos.x;
-
-        selectionStartY =
-        pos.y;
-
-
-        selectionBox.style.display =
-        "block";
-
-
-        updateSelectionBox(
-            pos.x,
-            pos.y,
-            0,
-            0
-        );
-
-
-        return;
-
-    }
-
-
-    /* EMOJI MODE DOES NOT DRAW */
-
-    if(
-    currentTool ===
-    "emoji"
-    ){
-
-        return;
-
-    }
-
-
-    /* NORMAL DRAWING */
-
-    drawing =
-    true;
-
-
-    canvas.setPointerCapture(
-        event.pointerId
-    );
-
-
-    startX =
-    pos.x;
-
-    startY =
-    pos.y;
-
-
-    lastX =
-    pos.x;
-
-    lastY =
-    pos.y;
-
-
-    savedImage =
-    ctx.getImageData(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-    );
-
-});
-
-
-/* =========================================
-   POINTER MOVE
-========================================= */
-
-canvas.addEventListener(
-"pointermove",
-event=>{
-
-    const pos =
-    getPosition(event);
-
-
-    /* =====================================
-       CREATE SELECTION
-    ===================================== */
-
-    if(
-    selecting
-    ){
-
-        const x =
-        Math.min(
-            selectionStartX,
-            pos.x
-        );
-
-        const y =
-        Math.min(
-            selectionStartY,
-            pos.y
-        );
-
-        const width =
-        Math.abs(
-            pos.x -
-            selectionStartX
-        );
-
-        const height =
-        Math.abs(
-            pos.y -
-            selectionStartY
-        );
-
-
-        updateSelectionBox(
-            x,
-            y,
-            width,
-            height
-        );
-
-        return;
-
-    }
-
-
-    if(!drawing)
-    return;
-
-
-    /* =====================================
-       PENCIL
-    ===================================== */
-
-    if(
-    currentTool ===
-    "pencil"
-    ){
-
-        ctx.save();
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            lastX,
-            lastY
-        );
-
-        ctx.lineTo(
-            pos.x,
-            pos.y
-        );
-
-        ctx.lineWidth =
-        Number(
-            sizeSlider.value
-        );
-
-        ctx.strokeStyle =
-        colorPicker.value;
-
-        ctx.lineCap =
-        "round";
-
-        ctx.lineJoin =
-        "round";
-
-        ctx.globalAlpha =
-        1;
-
-        ctx.stroke();
-
-        ctx.restore();
-
-
-        lastX =
-        pos.x;
-
-        lastY =
-        pos.y;
-
-        return;
-
-    }
-
-
-    /* =====================================
-       BRUSH
-       SOFT SMOOTH SHADED EFFECT
-    ===================================== */
-
-    if(
-    currentTool ===
-    "brush"
-    ){
-
-        ctx.save();
-
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            lastX,
-            lastY
-        );
-
-        ctx.lineTo(
-            pos.x,
-            pos.y
-        );
-
-
-        /*
-           MAIN SOFT BRUSH
-        */
-
-        ctx.lineWidth =
-        Number(
-            sizeSlider.value
-        ) * 2.3;
-
-
-        ctx.strokeStyle =
-        colorPicker.value;
-
-
-        ctx.lineCap =
-        "round";
-
-        ctx.lineJoin =
-        "round";
-
-
-        ctx.globalAlpha =
-        .30;
-
-
-        ctx.shadowColor =
-        colorPicker.value;
-
-
-        ctx.shadowBlur =
-        Number(
-            sizeSlider.value
-        ) * 1.5;
-
-
-        ctx.stroke();
-
-
-        /*
-           CENTER SMOOTH COLOR
-        */
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            lastX,
-            lastY
-        );
-
-        ctx.lineTo(
-            pos.x,
-            pos.y
-        );
-
-
-        ctx.lineWidth =
-        Number(
-            sizeSlider.value
-        ) * 1.25;
-
-
-        ctx.globalAlpha =
-        .55;
-
-
-        ctx.shadowBlur =
-        0;
-
-
-        ctx.stroke();
-
-
-        ctx.restore();
-
-
-        lastX =
-        pos.x;
-
-        lastY =
-        pos.y;
-
-        return;
-
-    }
-
-
-    /* =====================================
-       ERASER
-       ONLY ERASES WHILE DRAGGING
-    ===================================== */
-
-    if(
-    currentTool ===
-    "eraser"
-    ){
-
-        ctx.save();
-
-
-        ctx.globalCompositeOperation =
-        "destination-out";
-
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            lastX,
-            lastY
-        );
-
-        ctx.lineTo(
-            pos.x,
-            pos.y
-        );
-
-
-        ctx.lineWidth =
-        Number(
-            sizeSlider.value
-        ) * 3;
-
-
-        ctx.lineCap =
-        "round";
-
-
-        ctx.lineJoin =
-        "round";
-
-
-        ctx.stroke();
-
-
-        ctx.restore();
-
-
-        lastX =
-        pos.x;
-
-        lastY =
-        pos.y;
-
-        return;
-
-    }
-
-
-    /* =====================================
-       SHAPES
-    ===================================== */
-
-    drawShape(
-        pos.x,
-        pos.y
-    );
-
-});
-
-
-/* =========================================
-   POINTER UP
-========================================= */
-
-canvas.addEventListener(
-"pointerup",
-event=>{
-
-
-    /* =====================================
-       FINISH SELECTION
-    ===================================== */
-
-    if(
-    selecting
-    ){
-
-        selecting =
-        false;
-
-
-        const pos =
-        getPosition(event);
-
-
-        createSelectedObject(
-            selectionStartX,
-            selectionStartY,
-            pos.x,
-            pos.y
-        );
-
-
-        return;
-
-    }
-
-
-    /* NORMAL DRAWING */
-
-    if(drawing){
-
-        drawing =
-        false;
-
-        saveHistory();
-
-    }
-
-});
-
-
-canvas.addEventListener(
-"pointercancel",
-()=>{
-
-    drawing =
-    false;
-
-    selecting =
-    false;
-
-});
-
-
-/* =========================================
-   SELECTION BOX UPDATE
-========================================= */
-
-function updateSelectionBox(
-x,
-y,
-width,
-height
-){
-
-    selectionBox.style.left =
-    x + "px";
-
-
-    selectionBox.style.top =
-    y + "px";
-
-
-    selectionBox.style.width =
-    width + "px";
-
-
-    selectionBox.style.height =
-    height + "px";
-
-}
-
-
-/* =========================================
-   CREATE MOVABLE SELECTED AREA
-========================================= */
-
-function createSelectedObject(
-x1,
-y1,
-x2,
-y2
-){
-
-    const x =
-    Math.floor(
-        Math.min(x1,x2)
-    );
-
-    const y =
-    Math.floor(
-        Math.min(y1,y2)
-    );
-
-
-    const width =
-    Math.floor(
-        Math.abs(x2-x1)
-    );
-
-
-    const height =
-    Math.floor(
-        Math.abs(y2-y1)
-    );
-
-
-    /* TOO SMALL */
-
-    if(
-    width < 8 ||
-    height < 8
-    ){
-
-        selectionBox.style.display =
-        "none";
-
-        return;
-
-    }
-
-
-    /*
-       COPY SELECTED AREA
-    */
-
-    const imageData =
-    ctx.getImageData(
-        x,
-        y,
-        width,
-        height
-    );
-
-
-    selectionData =
-    {
-        x,
-        y,
-        width,
-        height,
-        imageData
-    };
-
-
-    /*
-       REMOVE FROM MAIN BOARD
-    */
-
-    ctx.clearRect(
-        x,
-        y,
-        width,
-        height
-    );
-
-
-    /*
-       CREATE MOVABLE CANVAS
-    */
-
-    selectedCanvas.width =
-    width;
-
-    selectedCanvas.height =
-    height;
-
-
-    selectedCtx.putImageData(
-        imageData,
-        0,
-        0
-    );
-
-
-    selectedCanvas.style.left =
-    x + "px";
-
-    selectedCanvas.style.top =
-    y + "px";
-
-
-    selectedCanvas.style.display =
-    "block";
-
-
-    selectionBox.style.display =
-    "none";
-
-
-    showObjectMenu(
-        x,
-        y
-    );
-
-
-}
-
-
-/* =========================================
-   MOVE SELECTED DRAWING
-========================================= */
-
-selectedCanvas.addEventListener(
-"pointerdown",
-event=>{
-
-    event.preventDefault();
-
-    event.stopPropagation();
-
-
-    if(
-    currentTool !==
-    "select"
-    )
-    return;
-
-
-    movingSelection =
-    true;
-
-
-    selectedCanvas.classList
-    .add("dragging");
-
-
-    const rect =
-    selectedCanvas.getBoundingClientRect();
-
-
-    moveOffsetX =
-    event.clientX -
-    rect.left;
-
-
-    moveOffsetY =
-    event.clientY -
-    rect.top;
-
-
-    selectedCanvas
-    .setPointerCapture(
-        event.pointerId
-    );
-
-});
-
-
-selectedCanvas.addEventListener(
-"pointermove",
-event=>{
-
-    if(!movingSelection)
-    return;
-
-
-    const boardRect =
-    board.getBoundingClientRect();
-
-
-    let x =
-    event.clientX -
-    boardRect.left -
-    moveOffsetX;
-
-
-    let y =
-    event.clientY -
-    boardRect.top -
-    moveOffsetY;
-
-
-    /*
-       KEEP INSIDE BOARD
-    */
-
-    x =
-    Math.max(
-        0,
-        Math.min(
-            x,
-            board.clientWidth -
-            selectedCanvas.width
-        )
-    );
-
-
-    y =
-    Math.max(
-        0,
-        Math.min(
-            y,
-            board.clientHeight -
-            selectedCanvas.height
-        )
-    );
-
-
-    selectedCanvas.style.left =
-    x + "px";
-
-
-    selectedCanvas.style.top =
-    y + "px";
-
-
-    showObjectMenu(
-        x,
-        y
-    );
-
-});
-
-
-selectedCanvas.addEventListener(
-"pointerup",
-()=>{
-
-    movingSelection =
-    false;
-
-
-    selectedCanvas.classList
-    .remove("dragging");
-
-});
-
-
-/* =========================================
-   FINALIZE SELECTION
-========================================= */
-
-function placeSelectionOnBoard(){
-
-    if(
-    selectedCanvas.style.display !==
-    "block"
-    )
-    return;
-
-
-    const x =
-    parseFloat(
-        selectedCanvas.style.left
-    );
-
-
-    const y =
-    parseFloat(
-        selectedCanvas.style.top
-    );
-
-
-    ctx.drawImage(
-        selectedCanvas,
-        x,
-        y
-    );
-
-
-    selectedCanvas.style.display =
-    "none";
-
-
-    selectionData =
-    null;
-
-
-    objectMenu.style.display =
-    "none";
-
-
-    saveHistory();
-
-}
-
-
-/* =========================================
-   DELETE SELECTED
-========================================= */
-
-function deleteSelected(){
-
-
-    /*
-       DELETE MOVABLE DRAWING
-    */
-
-    if(
-    selectedCanvas.style.display ===
-    "block"
-    ){
-
-        selectedCanvas.style.display =
-        "none";
-
-        objectMenu.style.display =
-        "none";
-
-        selectionData =
-        null;
-
-        saveHistory();
-
-        return;
-
-    }
-
-
-    /*
-       DELETE EMOJI
-    */
-
-    if(
-    selectedEmoji
-    ){
-
-        selectedEmoji.remove();
-
-        selectedEmoji =
-        null;
-
-        objectMenu.style.display =
-        "none";
-
-    }
-
-}
-
-
-/* =========================================
-   DESELECT / DONE
-========================================= */
-
-function deselectAll(){
-
-
-    /*
-       PLACE DRAWING BACK
-    */
-
-    if(
-    selectedCanvas.style.display ===
-    "block"
-    ){
-
-        placeSelectionOnBoard();
-
-    }
-
-
-    /*
-       EMOJI
-    */
-
-    document
-    .querySelectorAll(
-        ".emoji-object"
-    )
-    .forEach(e=>{
-
-        e.classList
-        .remove("selected");
-
-    });
-
-
-    selectedEmoji =
-    null;
-
-
-    selectionBox.style.display =
-    "none";
-
-
-    objectMenu.style.display =
-    "none";
-
-}
-
-
-/* =========================================
-   SHAPES
-========================================= */
-
-function drawShape(x,y){
-
-    ctx.putImageData(
-        savedImage,
-        0,
-        0
-    );
-
-
-    ctx.save();
-
-
-    ctx.beginPath();
-
-
-    ctx.strokeStyle =
-    colorPicker.value;
-
-
-    ctx.lineWidth =
-    Number(
-        sizeSlider.value
-    );
-
-
-    ctx.lineCap =
-    "round";
-
-
-    ctx.lineJoin =
-    "round";
-
-
-    const w =
-    x-startX;
-
-
-    const h =
-    y-startY;
-
-
-    /* LINE */
-
-    if(
-    currentTool ===
-    "line"
-    ){
-
-        ctx.moveTo(
-            startX,
-            startY
-        );
-
-        ctx.lineTo(
-            x,
-            y
-        );
-
-        ctx.stroke();
-
-    }
-
-
-    /* RECTANGLE */
-
-    if(
-    currentTool ===
-    "rectangle"
-    ){
-
-        ctx.strokeRect(
-            startX,
-            startY,
-            w,
-            h
-        );
-
-    }
-
-
-    /* CIRCLE */
-
-    if(
-    currentTool ===
-    "circle"
-    ){
-
-        const radius =
-        Math.sqrt(
-            w*w +
-            h*h
-        );
-
-
-        ctx.arc(
-            startX,
-            startY,
-            radius,
-            0,
-            Math.PI*2
-        );
-
-
-        ctx.stroke();
-
-    }
-
-
-    /* TRIANGLE */
-
-    if(
-    currentTool ===
-    "triangle"
-    ){
-
-        ctx.moveTo(
-            startX + w/2,
-            startY
-        );
-
-
-        ctx.lineTo(
-            startX,
-            startY+h
-        );
-
-
-        ctx.lineTo(
-            startX+w,
-            startY+h
-        );
-
-
-        ctx.closePath();
-
-
-        ctx.stroke();
-
-    }
-
-
-    /* STAR */
-
-    if(
-    currentTool ===
-    "star"
-    ){
-
-        drawStar(
-            startX+w/2,
-            startY+h/2,
-            Math.max(
-                Math.abs(w),
-                Math.abs(h)
-            )/2
-        );
-
-
-        ctx.stroke();
-
-    }
-
-
-    /* ARROW */
-
-    if(
-    currentTool ===
-    "arrow"
-    ){
-
-        drawArrow(
-            startX,
-            startY,
-            x,
-            y
-        );
-
-    }
-
-
-    ctx.restore();
-
-}
-
-
-/* =========================================
-   STAR
-========================================= */
-
-function drawStar(
-cx,
-cy,
-radius
-){
-
-    const inner =
-    radius*.45;
-
-
-    for(
-    let i=0;
-    i<10;
-    i++
-    ){
-
-        const angle =
-        -Math.PI/2 +
-        i*Math.PI/5;
-
-
-        const r =
-        i%2===0
-        ?
-        radius
-        :
-        inner;
-
-
-        const x =
-        cx +
-        Math.cos(angle)*r;
-
-
-        const y =
-        cy +
-        Math.sin(angle)*r;
-
-
-        if(i===0){
-
-            ctx.moveTo(x,y);
-
-        }
-
-        else{
-
-            ctx.lineTo(x,y);
-
-        }
-
-    }
-
-
-    ctx.closePath();
-
-}
-
-
-/* =========================================
-   ARROW
-========================================= */
-
-function drawArrow(
-x1,
-y1,
-x2,
-y2
-){
-
-    const angle =
-    Math.atan2(
-        y2-y1,
-        x2-x1
-    );
-
-
-    const head =
-    18;
-
-
-    ctx.moveTo(
-        x1,
-        y1
-    );
-
-
-    ctx.lineTo(
-        x2,
-        y2
-    );
-
-
-    ctx.lineTo(
-
-        x2 -
-        head *
-        Math.cos(
-            angle-Math.PI/6
-        ),
-
-        y2 -
-        head *
-        Math.sin(
-            angle-Math.PI/6
-        )
-
-    );
-
-
-    ctx.moveTo(
-        x2,
-        y2
-    );
-
-
-    ctx.lineTo(
-
-        x2 -
-        head *
-        Math.cos(
-            angle+Math.PI/6
-        ),
-
-        y2 -
-        head *
-        Math.sin(
-            angle+Math.PI/6
-        )
-
-    );
-
-
-    ctx.stroke();
-
-}
-
-
-/* =========================================
-   EMOJIS
-========================================= */
-
-const emojis=[
-
-"😀","😃","😄","😁",
-"😂","🤣","😊","😍",
-"🥰","😎","🤩","🥳",
-
-"😭","😡","😴","🤔",
-
-"👍","👏","🙌","💪",
-"🙏","❤️","💙","💜",
-
-"💚","💛","🔥","✨",
-"⭐","🌈","☀️","🌙",
-
-"🌸","🌹","🍀","🦋",
-"🐶","🐱","🐦","🚀",
-
-"🎈","🎉","🎂","🍕",
-"🍔","⚽","🏆","🎮",
-
-"📚","✏️"
-
-];
-
-
-emojis.forEach(emoji=>{
-
-    const button =
-    document.createElement("button");
-
-
-    button.className =
-    "emoji";
-
-
-    button.textContent =
-    emoji;
-
-
-    button.onclick =
-    ()=>{
-
-        addEmoji(
-            emoji
-        );
-
-    };
-
-
-    emojiPanel.appendChild(
-        button
-    );
-
-});
-
-
-function toggleEmojiPanel(){
-
-    emojiPanel.classList
-    .toggle("show");
-
-}
-
-
-/* =========================================
-   EMOJI MOVE
-========================================= */
-
-let selectedEmoji =
-null;
-
-
-function addEmoji(emoji){
-
-    const element =
-    document.createElement("div");
-
-
-    element.className =
-    "emoji-object";
-
-
-    element.textContent =
-    emoji;
-
-
-    element.style.left =
-    "50%";
-
-
-    element.style.top =
-    "50%";
-
-
-    element.style.transform =
-    "translate(-50%,-50%)";
-
-
-    board.appendChild(
-        element
-    );
-
-
-    let dragging =
-    false;
-
-    let offsetX =
-    0;
-
-    let offsetY =
-    0;
-
-
-    element.addEventListener(
-    "pointerdown",
-    event=>{
-
-        if(
-        currentTool !==
-        "select"
-        )
-        return;
-
-
-        event.preventDefault();
-
-        event.stopPropagation();
-
-
-        deselectAll();
-
-
-        selectedEmoji =
-        element;
-
-
-        document
-        .querySelectorAll(
-            ".emoji-object"
-        )
-        .forEach(e=>{
-
-            e.classList
-            .remove("selected");
-
-        });
-
-
-        element.classList
-        .add("selected");
-
-
-        dragging =
-        true;
-
-
-        const rect =
-        element.getBoundingClientRect();
-
-
-        offsetX =
-        event.clientX -
-        rect.left;
-
-
-        offsetY =
-        event.clientY -
-        rect.top;
-
-
-        element
-        .setPointerCapture(
-            event.pointerId
-        );
-
-
-        showObjectMenu(
-            parseFloat(
-                element.style.left
-            ) || 0,
-
-            parseFloat(
-                element.style.top
-            ) || 0
-        );
-
-    });
-
-
-    element.addEventListener(
-    "pointermove",
-    event=>{
-
-        if(!dragging)
-        return;
-
-
-        const boardRect =
-        board.getBoundingClientRect();
-
-
-        let x =
-        event.clientX -
-        boardRect.left -
-        offsetX;
-
-
-        let y =
-        event.clientY -
-        boardRect.top -
-        offsetY;
-
-
-        element.style.left =
-        x+"px";
-
-
-        element.style.top =
-        y+"px";
-
-
-        element.style.transform =
-        "none";
-
-
-        showObjectMenu(
-            x,
-            y
-        );
-
-    });
-
-
-    element.addEventListener(
-    "pointerup",
-    ()=>{
-
-        dragging =
-        false;
-
-    });
-
-}
-
-
-/* =========================================
-   OBJECT MENU
-========================================= */
-
-function showObjectMenu(x,y){
-
-    objectMenu.style.display =
-    "flex";
-
-
-    const menuWidth =
-    120;
-
-
-    let menuX =
-    x;
-
-
-    let menuY =
-    y-45;
-
-
-    if(menuY<5){
-
-        menuY =
-        y+40;
-
-    }
-
-
-    objectMenu.style.left =
-    Math.max(
-        5,
-        Math.min(
-            menuX,
-            board.clientWidth-menuWidth
-        )
-    )+"px";
-
-
-    objectMenu.style.top =
-    Math.max(
-        5,
-        menuY
-    )+"px";
-
-}
-
-
-/* =========================================
-   HISTORY
-========================================= */
-
-function saveHistory(){
-
-    const data =
-    canvas.toDataURL();
-
-
-    history.push(data);
-
-
-    if(
-    history.length>40
-    ){
-
-        history.shift();
-
-    }
-
-
-    redoHistory=[];
-
-
-    localStorage.setItem(
-        "coolboardDrawing",
-        data
-    );
-
-}
-
-
-function undo(){
-
-    deselectAll();
-
-
-    if(
-    history.length<2
-    )
-    return;
-
-
-    redoHistory.push(
-        history.pop()
-    );
-
-
-    restoreImage(
-        history[
-            history.length-1
-        ]
-    );
-
-}
-
-
-function redo(){
-
-    deselectAll();
-
-
-    if(
-    redoHistory.length===0
-    )
-    return;
-
-
-    const data =
-    redoHistory.pop();
-
-
-    history.push(data);
-
-
-    restoreImage(data);
-
-}
-
-
-function restoreImage(data){
-
-    const image =
-    new Image();
-
-
-    image.onload =
-    ()=>{
-
-        ctx.clearRect(
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        );
-
-
-        ctx.drawImage(
-            image,
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        );
-
-    };
-
-
-    image.src =
-    data;
-
-}
-
-
-/* =========================================
-   CLEAR BOARD
-========================================= */
-
-function clearBoard(){
-
-    if(
-    !confirm(
-        "বোর্ড সম্পূর্ণ পরিষ্কার করতে চাও?"
-    )
-    )
-    return;
-
-
-    ctx.clearRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-    );
-
-
-    document
-    .querySelectorAll(
-        ".emoji-object"
-    )
-    .forEach(e=>e.remove());
-
-
-    deselectAll();
-
-
-    saveHistory();
-
-}
-
-
-/* =========================================
-   BOARD COLOR
-========================================= */
-
-boardColor.addEventListener(
-"input",
-()=>{
-
-    board.style.background =
-    boardColor.value;
-
-});
-
-
-/* =========================================
-   EXPORT
-========================================= */
-
-function exportBoard(){
-
-    deselectAll();
-
-
-    const exportCanvas =
-    document.createElement(
-        "canvas"
-    );
-
-
-    exportCanvas.width =
-    canvas.width;
-
-
-    exportCanvas.height =
-    canvas.height;
-
-
-    const exportCtx =
-    exportCanvas.getContext(
-        "2d"
-    );
-
-
-    /* BOARD BACKGROUND */
-
-    exportCtx.fillStyle =
-    boardColor.value;
-
-
-    exportCtx.fillRect(
-        0,
-        0,
-        exportCanvas.width,
-        exportCanvas.height
-    );
-
-
-    /* DRAWING */
-
-    exportCtx.drawImage(
-        canvas,
-        0,
-        0
-    );
-
-
-    /* EMOJIS NOT RENDERED PERFECTLY
-       INTO CANVAS ON EVERY DEVICE,
-       SO DRAWING IS EXPORTED.
-    */
-
-
-    const link =
-    document.createElement("a");
-
-
-    link.download =
-    "CoolBoard.png";
-
-
-    link.href =
-    exportCanvas.toDataURL(
-        "image/png"
-    );
-
-
-    link.click();
-
-}
-
-
-/* =========================================
-   MODE SYSTEM
-========================================= */
-
-function setMode(
-mode,
-button
-){
-
-    document
-    .querySelectorAll(
-        ".mode-btn"
-    )
-    .forEach(btn=>{
-
-        btn.classList
-        .remove("active");
-
-    });
-
-
-    button.classList
-    .add("active");
-
-
-    document
-    .querySelectorAll(
-        ".advanced"
-    )
-    .forEach(tool=>{
-
-        tool.style.display =
-        mode==="advanced"
-        ?
-        "block"
-        :
-        "none";
-
-    });
-
-
-    if(
-    mode==="kids"
-    ){
-
-        /*
-           IF ADVANCED TOOL ACTIVE,
-           RETURN TO PENCIL
-        */
-
-        const activeTool =
-        document.querySelector(
-            ".tool.active"
-        );
-
-
-        if(
-        activeTool &&
-        activeTool.classList
-        .contains("advanced")
-        ){
-
-            currentTool =
-            "pencil";
-
-
-            document
-            .querySelectorAll(".tool")
-            .forEach(
-                t=>t.classList
-                .remove("active")
-            );
-
-
-            document
-            .querySelector(
-                '[data-tool="pencil"]'
-            )
-            .classList
-            .add("active");
-
-        }
-
-    }
-
-}
-
-
-/* =========================================
-   INITIAL HISTORY
-========================================= */
-
-saveHistory();
-
-
-/* =========================================
-   LOAD SAVED DRAWING
-========================================= */
-
-const savedBoard =
-localStorage.getItem(
-    "coolboardDrawing"
-);
-
-
-if(savedBoard){
-
-    setTimeout(
-    ()=>{
-
-        restoreImage(
-            savedBoard
-        );
-
-        history=[
-            savedBoard
-        ];
-
-    },
-    100
-    );
-
-}
-
-</script>
-
-</body>
+      <p class="fw-intro">
+        Welcome to a peaceful little garden filled with beautiful
+        colors, delicate petals and lovely moments.
+        Take a breath, enjoy the beauty, and let happiness bloom. 🌿
+      </p>
+
+      <button type="button" class="fw-click" id="fwClickHere">
+        🌸 Click Here <span>→</span>
+      </button>
+
+      <p class="fw-note">A garden full of little wonders ♡</p>
+
+    </div>
+
+    <!-- Automatic Flower Slideshow -->
+    <div class="fw-gallery" id="fwGallery" hidden>
+
+      <header class="fw-gallery-heading">
+        <span class="fw-label">YOUR LITTLE GARDEN</span>
+        <h2>Beautiful <span>Blooms</span></h2>
+        <p>Every flower has its own little beauty. 🌷</p>
+      </header>
+
+      <div class="fw-counter">
+        <span>🌸</span>
+        <span id="fwCounter">Flower 1 of 33</span>
+        <span>🌿</span>
+      </div>
+
+      <div class="fw-photo">
+        <img
+          id="fwImage"
+          src="photos/Flower1.jpg"
+          alt="Flower 1"
+        />
+      </div>
+
+      <p class="fw-caption" id="fwCaption">
+        A little flower, a little happiness. 🌼
+      </p>
+
+    </div>
+
+    <footer class="fw-footer">
+      <span>🌿</span>
+      <p>Let happiness bloom, one flower at a time.</p>
+      <span>🌿</span>
+    </footer>
+
+  </div>
+</section>
+
+
+    </section>
+
+    <!-- =========================================================
+     WISH LETTER
+========================================================= -->
+
+    <section
+      id="wishPage"
+      class="screen inner-screen wish-screen"
+    >
+      <div class="page-content">
+        <button
+          class="back-button"
+          data-back
+        >
+          ← Back
+        </button>
+
+        <div class="letter">
+          <div class="letter-icon">💌</div>
+
+          <h1>A Birthday Wish</h1>
+
+          <p>Dear Lamiya,</p>
+
+          <p>Happy Birthday! 🎉</p>
+
+          <p>
+            May the coming year bring you happiness, success, good health,
+            beautiful memories and many peaceful moments.
+          </p>
+
+          <p>
+            Keep smiling, keep learning, keep enjoying the little things, and
+            make this new year of life memorable. 🌷✨
+          </p>
+
+          <div class="letter-footer">🌸 💐 🦋 🕊️ 🌸</div>
+        </div>
+      </div>
+     
+    </section>
+
+
+<!-- All 33 image paths -->
+  <select
+    
+     id="photo33"
+      class="screen inner-screen wish-screen"
+    >
+      <div class="page-content">
+        <button
+          class="back-button"
+          data-back
+        >
+          ← Back
+        </button> 
+  <div id="peacefulFlowerFileList" hidden>
+    <img src="photos/flower1.jpg" alt="Flower 1">
+    <img src="photos/flower2.jpg" alt="Flower 2">
+    <img src="photos/flower3.jpg" alt="Flower 3">
+    <img src="photos/flower4.jpg" alt="Flower 4">
+    <img src="photos/flower5.jpg" alt="Flower 5">
+    <img src="photos/flower6.jpg" alt="Flower 6">
+    <img src="photos/flower7.jpg" alt="Flower 7">
+    <img src="photos/flower8.jpg" alt="Flower 8">
+    <img src="photos/flower9.jpg" alt="Flower 9">
+    <img src="photos/flower10.jpg" alt="Flower 10">
+    <img src="photos/flower11.jpg" alt="Flower 11">
+    <img src="photos/flower12.jpg" alt="Flower 12">
+    <img src="photos/flower13.jpg" alt="Flower 13">
+    <img src="photos/flower14.jpg" alt="Flower 14">
+    <img src="photos/flower15.jpg" alt="Flower 15">
+    <img src="photos/flower16.jpg" alt="Flower 16">
+    <img src="photos/flower17.jpg" alt="Flower 17">
+    <img src="photos/flower18.jpg" alt="Flower 18">
+    <img src="photos/flower19.jpg" alt="Flower 19">
+    <img src="photos/flower20.jpg" alt="Flower 20">
+    <img src="photos/flower21.jpg" alt="Flower 21">
+    <img src="photos/flower22.jpg" alt="Flower 22">
+    <img src="photos/flower23.jpg" alt="Flower 23">
+    <img src="photos/flower24.jpg" alt="Flower 24">
+    <img src="photos/flower25.jpg" alt="Flower 25">
+    <img src="photos/flower26.jpg" alt="Flower 26">
+    <img src="photos/flower27.jpg" alt="Flower 27">
+    <img src="photos/flower28.jpg" alt="Flower 28">
+    <img src="photos/flower29.jpg" alt="Flower 29">
+    <img src="photos/flower30.jpg" alt="Flower 30">
+    <img src="photos/flower31.jpg" alt="Flower 31">
+    <img src="photos/flower32.jpg" alt="Flower 32">
+    <img src="photos/flower33.jpg" alt="Flower 33">
+  </div></select>
+
+    <script src="script.js"></script>
+  </body>
 </html>
