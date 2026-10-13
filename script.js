@@ -1118,11 +1118,11 @@ if (!window.favoriteShowcaseMediaReady) {
 
   // Change the extension here if your files are .webm or .ogg.
   const sleepFiles = [
-    "photos/sleep.mp4",
-    "photos/sleep1.mp4",
-    "photos/sleep2.mp4",
-    "photos/sleep3.mp4",
-    "photos/sleep4.mp4",
+    "sleep.mp4",
+    "sleep1.mp4",
+    "sleep2.mp4",
+    "sleep3.mp4",
+    "sleep4.mp4",
   ];
 
   const musicFile = "ruposh.mp4";
