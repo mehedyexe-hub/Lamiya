@@ -1125,7 +1125,7 @@ if (!window.favoriteShowcaseMediaReady) {
     "photos/sleep4.mp4",
   ];
 
-  const musicFile = "photos/ruposh.mp4";
+  const musicFile = "ruposh.mp4";
 
   let sleepIndex = 0;
   let sleepStarted = false;
@@ -1346,7 +1346,7 @@ if (!window.favoriteShowcaseMediaReady) {
 
   musicVideo.addEventListener("error", () => {
     musicTimerStatus.textContent =
-      "Music video unavailable. Check photos/ruposh.mp4.";
+      "Music video unavailable. Check ruposh.mp4.";
   });
 })();
 
